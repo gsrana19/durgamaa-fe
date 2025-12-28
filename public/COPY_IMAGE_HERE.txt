@@ -1,0 +1,13 @@
+INSTRUCTIONS TO ADD DURGA MAA IMAGE:
+=====================================
+
+1. Copy your Durga Maa image file to THIS folder (frontend/public/)
+2. Rename it to exactly: durga-maa-logo.png
+3. Refresh your browser (Ctrl+Shift+R)
+
+The image will then appear in the header!
+
+Supported formats: .png, .jpg, .jpeg, .svg
+
+
+

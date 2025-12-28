@@ -1,0 +1,32 @@
+INSTRUCTIONS FOR TEMPLE HERO IMAGE
+===================================
+
+To display the temple image on the Home page:
+
+1. Save your temple image file as: temple-hero.jpg
+   (Or temple-hero.png if using PNG format)
+
+2. Place it in this directory: frontend/public/
+
+3. Supported formats: .jpg, .jpeg, .png, .webp
+
+4. Recommended image specifications for best quality:
+   - Resolution: 1920x1080 or higher
+   - Format: JPEG (high quality) or PNG
+   - File size: Under 2MB for faster loading
+   - Aspect ratio: 16:9 or 4:3 works well
+
+5. The image will automatically:
+   - Display next to the Sanskrit text on desktop
+   - Display above the text on mobile devices
+   - Use high-quality rendering settings
+   - Be responsive and maintain aspect ratio
+
+6. If the image doesn't appear, check:
+   - File name matches exactly: temple-hero.jpg
+   - File is in frontend/public/ directory
+   - Browser console for any errors
+
+The image path in the code is: /temple-hero.jpg
+This will work automatically once the file is placed in the public folder.
+

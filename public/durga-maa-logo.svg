@@ -1,0 +1,24 @@
+<svg width="70" height="70" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+  <!-- Durga Maa Face - Stylized -->
+  <circle cx="25" cy="25" r="24" fill="#FF9933" stroke="#FF6600" stroke-width="2"/>
+  
+  <!-- Third Eye -->
+  <circle cx="25" cy="18" r="3" fill="#FF0000"/>
+  <path d="M 25 15 L 25 12 L 23 13 L 25 12 L 27 13 Z" fill="#FF0000"/>
+  
+  <!-- Eyes -->
+  <ellipse cx="18" cy="22" rx="4" ry="5" fill="#000000"/>
+  <ellipse cx="32" cy="22" rx="4" ry="5" fill="#000000"/>
+  <circle cx="18" cy="22" r="2" fill="#FFFFFF"/>
+  <circle cx="32" cy="22" r="2" fill="#FFFFFF"/>
+  
+  <!-- Nose -->
+  <path d="M 25 26 L 23 30 L 25 30 L 27 30 Z" fill="#000000"/>
+  
+  <!-- Nose Ring -->
+  <circle cx="27" cy="28" r="2" fill="none" stroke="#FF0000" stroke-width="1.5"/>
+  
+  <!-- Lips -->
+  <path d="M 22 32 Q 25 34 28 32" stroke="#FF0000" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>
+
