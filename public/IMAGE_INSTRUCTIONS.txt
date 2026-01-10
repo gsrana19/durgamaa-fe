@@ -30,3 +30,8 @@ To display the temple image on the Home page:
 The image path in the code is: /temple-hero.jpg
 This will work automatically once the file is placed in the public folder.
 
+
+
+
+
+

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
-import { getDonationStats, createDonation, getPublicUpdates, 
+import { getDonationStats, createDonation, getPublicUpdates, getLatestTempleImage,
          getCountries, getStates, getDistricts, getThanas, getVillages } from '../services/api';
 
 const MandirNirmaanSeva = () => {
   const { t } = useTranslation();
   const [stats, setStats] = useState(null);
   const [updates, setUpdates] = useState([]);
+  const [latestTempleImage, setLatestTempleImage] = useState(null);
   
   // Location data from API
   const [countries, setCountries] = useState([]);
@@ -210,12 +211,25 @@ const MandirNirmaanSeva = () => {
   
   const loadData = async () => {
     try {
-      const [statsData, updatesData] = await Promise.all([
+      const [statsData, updatesData, latestImage] = await Promise.all([
         getDonationStats(),
         getPublicUpdates(),
+        getLatestTempleImage().catch(() => null), // Don't fail if no image available
       ]);
       setStats(statsData);
       setUpdates(updatesData);
+      
+      // Set latest temple image if available
+      if (latestImage && latestImage.imageUrl) {
+        const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8082/api';
+        const backendBaseUrl = apiBaseUrl.replace('/api', '');
+        const fullImageUrl = latestImage.imageUrl.startsWith('http') 
+          ? latestImage.imageUrl 
+          : `${backendBaseUrl}${latestImage.imageUrl}`;
+        setLatestTempleImage(fullImageUrl);
+      } else {
+        setLatestTempleImage(null);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     }
@@ -288,9 +302,28 @@ const MandirNirmaanSeva = () => {
                 {t('donation.subtitle')}
               </p>
             </div>
-            <div className="flex-1 hidden md:block">
-              <div className="bg-white bg-opacity-20 rounded-lg p-8 text-center">
-                <div className="text-6xl">🕉️</div>
+            <div className="flex-1 w-full md:w-auto">
+              <div className="bg-white bg-opacity-20 rounded-lg p-4 md:p-8 text-center overflow-hidden min-h-[200px] md:min-h-[300px] flex items-center justify-center">
+                {latestTempleImage ? (
+                  <img 
+                    src={latestTempleImage} 
+                    alt="Latest Temple Construction" 
+                    className="w-full h-full max-h-[300px] md:max-h-[400px] object-cover rounded-lg"
+                    onError={(e) => {
+                      // Fallback to Om symbol if image fails to load
+                      e.target.style.display = 'none';
+                      const parent = e.target.parentElement;
+                      if (parent && !parent.querySelector('.fallback-om')) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'text-6xl fallback-om';
+                        fallback.textContent = '🕉️';
+                        parent.appendChild(fallback);
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="text-6xl">🕉️</div>
+                )}
               </div>
             </div>
           </div>
@@ -326,12 +359,18 @@ const MandirNirmaanSeva = () => {
         {stats && (
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
             <h2 className="text-2xl md:text-3xl font-bold text-saffron-600 mb-4 md:mb-6">{t('donation.blessingsTitle')}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6">
               <div className="text-center p-4 bg-saffron-50 rounded-lg">
                 <div className="text-2xl md:text-4xl font-bold text-saffron-600 mb-2">
                   ₹{stats.totalAmount.toLocaleString('en-IN')}
                 </div>
                 <div className="text-gray-600 text-sm md:text-base">{t('donation.totalCollected')}</div>
+              </div>
+              <div className="text-center p-4 bg-red-50 rounded-lg">
+                <div className="text-2xl md:text-4xl font-bold text-red-600 mb-2">
+                  ₹{(stats.totalExpenses || 0).toLocaleString('en-IN')}
+                </div>
+                <div className="text-gray-600 text-sm md:text-base">Expensed So Far</div>
               </div>
               <div className="text-center p-4 bg-saffron-50 rounded-lg">
                 <div className="text-2xl md:text-4xl font-bold text-saffron-600 mb-2">

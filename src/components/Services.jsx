@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import './Home.css';
 
@@ -23,26 +24,42 @@ const Services = () => {
       <section className="temple-info">
         <h2>{t('services.availableSeva')}</h2>
         <div className="features">
-          <div className="feature-card">
+          <Link 
+            to="/services/morning-aarti" 
+            className="feature-card" 
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             <div className="feature-icon">🕉️</div>
             <h3>{t('services.morningAarti')}</h3>
             <p>{t('services.morningAartiDesc')}</p>
-          </div>
-          <div className="feature-card">
+          </Link>
+          <Link 
+            to="/services/special-puja" 
+            className="feature-card" 
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             <div className="feature-icon">🕯️</div>
             <h3>{t('services.specialPuja')}</h3>
             <p>{t('services.specialPujaDesc')}</p>
-          </div>
-          <div className="feature-card">
+          </Link>
+          <Link 
+            to="/services/abhishekam" 
+            className="feature-card" 
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             <div className="feature-icon">📿</div>
             <h3>{t('services.abhishekam')}</h3>
             <p>{t('services.abhishekamDesc')}</p>
-          </div>
-          <div className="feature-card">
+          </Link>
+          <Link 
+            to="/services/flower-offering" 
+            className="feature-card" 
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             <div className="feature-icon">🌺</div>
             <h3>{t('services.flowerOffering')}</h3>
             <p>{t('services.flowerOfferingDesc')}</p>
-          </div>
+          </Link>
         </div>
       </section>
 

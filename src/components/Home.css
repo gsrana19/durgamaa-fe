@@ -119,11 +119,22 @@
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   text-align: center;
   transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  display: block;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .feature-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 8px 16px rgba(255, 153, 51, 0.3);
+}
+
+.feature-card:active {
+  transform: translateY(-5px);
 }
 
 .feature-icon {
@@ -182,6 +193,97 @@
   font-weight: bold;
 }
 
+/* Team Members Section */
+/* Priests Grid - One photo per row, centered */
+.team-members-priests-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 30px;
+  margin-bottom: 50px;
+}
+
+.team-members-priests-grid .team-member-card {
+  max-width: 350px;
+  width: 100%;
+}
+
+/* Regular Team Members Grid - Three per row */
+.team-members-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.team-member-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.team-member-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(255, 153, 51, 0.3);
+}
+
+.team-member-image-container {
+  width: 100%;
+  min-height: 300px;
+  max-height: 400px;
+  overflow: hidden;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.team-member-image {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  object-fit: contain;
+  transition: transform 0.3s;
+  border-radius: 8px;
+}
+
+.team-member-card:hover .team-member-image {
+  transform: scale(1.05);
+}
+
+.team-member-info {
+  padding: 20px;
+  text-align: center;
+  background: white;
+}
+
+.team-member-name {
+  color: #FF9933;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+
+.team-member-position {
+  color: #666;
+  font-size: 1rem;
+  margin: 0 0 8px 0;
+  font-style: italic;
+}
+
+.team-member-mobile {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0;
+  margin-top: 4px;
+}
+
 @media (max-width: 768px) {
   .hero {
     min-height: 500px;
@@ -208,5 +310,45 @@
   
   .timings {
     padding: 20px;
+  }
+  
+  /* Priests grid - responsive */
+  .team-members-priests-grid {
+    padding: 0 10px;
+  }
+  
+  .team-members-priests-grid .team-member-card {
+    max-width: 100%;
+  }
+  
+  /* Regular team grid - 2 columns on tablet, 1 on mobile */
+  .team-members-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .team-member-image-container {
+    min-height: 250px;
+    max-height: 300px;
+    padding: 8px;
+  }
+  
+  .team-member-image {
+    max-height: 280px;
+  }
+  
+  .team-member-name {
+    font-size: 1.1rem;
+  }
+  
+  .team-member-position {
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra small screens - single column for all */
+@media (max-width: 480px) {
+  .team-members-grid {
+    grid-template-columns: 1fr;
   }
 }

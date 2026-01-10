@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { login, checkAuth } from '../../services/api';
 
 const AdminLogin = () => {
@@ -8,10 +8,15 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   
   useEffect(() => {
     checkAuthStatus();
-  }, []);
+    // Check if there's a session expiry message
+    if (location.state?.message) {
+      setError(location.state.message);
+    }
+  }, [location]);
   
   const checkAuthStatus = async () => {
     try {
@@ -30,10 +35,57 @@ const AdminLogin = () => {
     setLoading(true);
     
     try {
-      await login(userId, password);
-      navigate('/admin/dashboard');
+      const response = await login(userId, password);
+      console.log('Login response received:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response keys:', response ? Object.keys(response) : 'null');
+      
+      // Check if response has authenticated flag or message indicating success
+      if (response && (
+        response.authenticated === true || 
+        response.message === 'Login successful' ||
+        response.sessionId
+      )) {
+        console.log('Login successful, navigating to dashboard');
+        
+        // Store authentication and last login time
+        localStorage.setItem('isAuthenticated', 'true');
+        if (response.lastLoginTime) {
+          localStorage.setItem('lastLoginTime', response.lastLoginTime);
+        }
+        
+        // Small delay to ensure session is set
+        setTimeout(() => {
+          navigate('/admin/dashboard');
+        }, 100);
+      } else {
+        console.warn('Login response missing expected fields:', response);
+        setError('Login failed. Please check your credentials.');
+      }
     } catch (error) {
-      setError(error.response?.data?.error || 'Login failed. Please check your credentials.');
+      console.error('Login catch error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        response: error.response,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status
+      });
+      
+      // If we got a 200 response but axios still threw, it might be a parsing issue
+      if (error.response && error.response.status === 200) {
+        console.log('Got 200 but error thrown, trying to use response data');
+        const data = error.response.data;
+        if (data && (data.authenticated || data.message === 'Login successful')) {
+          setTimeout(() => {
+            navigate('/admin/dashboard');
+          }, 100);
+          return;
+        }
+      }
+      
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Network Error';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

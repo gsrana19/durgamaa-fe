@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { getPublicDonationsPaginated } from '../services/api';
+import { getPublicDonationsPaginated, getCountries, getStates, getDistricts, getThanas, getVillages } from '../services/api';
+
+// xlsx library loaded from CDN (see public/index.html)
+// Access via window.XLSX
+const XLSX = typeof window !== 'undefined' ? window.XLSX : null;
 
 const DonorList = () => {
   const [donations, setDonations] = useState([]);
@@ -10,16 +14,152 @@ const DonorList = () => {
   const [pageSize] = useState(20);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Search filters
+  const [searchFilters, setSearchFilters] = useState({
+    name: '',
+    stateId: null,
+    district: '',
+    thana: '',
+    village: ''
+  });
 
+  // Location data for dropdowns
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [thanas, setThanas] = useState([]);
+  const [villages, setVillages] = useState([]);
+
+  // Selected location IDs for cascading dropdowns
+  const [selectedStateId, setSelectedStateId] = useState(null);
+  const [selectedDistrictId, setSelectedDistrictId] = useState(null);
+  const [selectedThanaId, setSelectedThanaId] = useState(null);
+  const [selectedVillageId, setSelectedVillageId] = useState(null);
+  const [showCustomVillage, setShowCustomVillage] = useState(false);
+  const [customVillageName, setCustomVillageName] = useState('');
+
+  const searchTimeoutRef = useRef(null);
+  const isInitialMount = useRef(true);
+
+  // Load countries on mount
+  useEffect(() => {
+    loadCountries();
+  }, []);
+
+  // Load states when countries load (default to India)
+  useEffect(() => {
+    if (countries.length > 0) {
+      const india = countries.find(c => c.name === 'India') || countries[0];
+      if (india) {
+        loadStates(india.id);
+      }
+    }
+  }, [countries]);
+
+  // Auto-select Jharkhand when states load
+  useEffect(() => {
+    if (states.length > 0 && !selectedStateId) {
+      const jharkhand = states.find(s => s.name === 'Jharkhand');
+      if (jharkhand) {
+        setSelectedStateId(jharkhand.id);
+        const defaultFilters = {
+          name: '',
+          stateId: jharkhand.id,
+          district: '',
+          thana: '',
+          village: ''
+        };
+        setSearchFilters(defaultFilters);
+        // Trigger search immediately for default state
+        loadDonations(0, defaultFilters);
+      }
+    }
+  }, [states]);
+
+  // Load districts when state changes
+  useEffect(() => {
+    if (selectedStateId) {
+      loadDistricts(selectedStateId);
+    } else {
+      setDistricts([]);
+      setSelectedDistrictId(null);
+      setThanas([]);
+      setSelectedThanaId(null);
+      setVillages([]);
+      setSelectedVillageId(null);
+    }
+  }, [selectedStateId]);
+
+  // Load thanas when district changes
+  useEffect(() => {
+    if (selectedDistrictId) {
+      loadThanas(selectedDistrictId);
+    } else {
+      setThanas([]);
+      setSelectedThanaId(null);
+      setVillages([]);
+      setSelectedVillageId(null);
+    }
+  }, [selectedDistrictId]);
+
+  // Load villages when thana changes
+  useEffect(() => {
+    if (selectedThanaId) {
+      loadVillages(selectedThanaId);
+    } else {
+      setVillages([]);
+      setSelectedVillageId(null);
+      setShowCustomVillage(false);
+      setCustomVillageName('');
+    }
+  }, [selectedThanaId]);
+
+  // Load donations when page changes
   useEffect(() => {
     loadDonations(currentPage);
+    // Note: loadDonations uses searchFilters but we intentionally only re-run on page change
+    // eslint-disable-next-line
   }, [currentPage]);
 
-  const loadDonations = async (page) => {
+  // Handle search filter changes with debouncing
+  useEffect(() => {
+    // Skip on initial mount
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Reset to page 0 when filters change
+    if (currentPage !== 0) {
+      setCurrentPage(0);
+    } else {
+      // Debounce search by 300ms if already on page 0
+      searchTimeoutRef.current = setTimeout(() => {
+        loadDonations(0);
+      }, 300);
+    }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+    // Note: currentPage and loadDonations are intentionally omitted from dependencies
+    // eslint-disable-next-line
+  }, [searchFilters.name, searchFilters.stateId, searchFilters.district, searchFilters.thana, searchFilters.village]);
+
+  const loadDonations = async (page, filters = null) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getPublicDonationsPaginated(page, pageSize);
+      const filtersToUse = filters || searchFilters;
+      const response = await getPublicDonationsPaginated(page, pageSize, filtersToUse);
       setDonations(response.donations || []);
       setCurrentPage(response.currentPage || 0);
       setTotalPages(response.totalPages || 0);
@@ -58,6 +198,204 @@ const DonorList = () => {
     return `₹${parseFloat(amount).toLocaleString('en-IN')}`;
   };
 
+  const loadCountries = async () => {
+    try {
+      const data = await getCountries();
+      setCountries(data);
+    } catch (error) {
+      console.error('Error loading countries:', error);
+    }
+  };
+
+  const loadStates = async (countryId) => {
+    try {
+      const data = await getStates(countryId);
+      setStates(data);
+    } catch (error) {
+      console.error('Error loading states:', error);
+    }
+  };
+
+  const loadDistricts = async (stateId) => {
+    try {
+      const data = await getDistricts(stateId);
+      setDistricts(data);
+      setSelectedDistrictId(null);
+      setThanas([]);
+      setSelectedThanaId(null);
+      setVillages([]);
+      setSelectedVillageId(null);
+    } catch (error) {
+      console.error('Error loading districts:', error);
+    }
+  };
+
+  const loadThanas = async (districtId) => {
+    try {
+      const data = await getThanas(districtId);
+      setThanas(data);
+      setSelectedThanaId(null);
+      setVillages([]);
+      setSelectedVillageId(null);
+    } catch (error) {
+      console.error('Error loading thanas:', error);
+    }
+  };
+
+  const loadVillages = async (thanaId) => {
+    try {
+      const data = await getVillages(thanaId);
+      setVillages(data);
+      setSelectedVillageId(null);
+      setShowCustomVillage(false);
+      setCustomVillageName('');
+    } catch (error) {
+      console.error('Error loading villages:', error);
+    }
+  };
+
+  const handleStateChange = (stateId, stateName) => {
+    setSelectedStateId(stateId);
+    const newFilters = {
+      ...searchFilters,
+      stateId: stateId,
+      district: '',
+      thana: '',
+      village: ''
+    };
+    setSearchFilters(newFilters);
+    // Trigger search immediately with new filters (no debounce for dropdown selection)
+    setCurrentPage(0);
+    loadDonations(0, newFilters);
+  };
+
+  const handleDistrictChange = (districtId, districtName) => {
+    setSelectedDistrictId(districtId);
+    setSearchFilters(prev => ({ 
+      ...prev, 
+      district: districtName || '', 
+      thana: '', 
+      village: '' 
+    }));
+  };
+
+  const handleThanaChange = (thanaId, thanaName) => {
+    setSelectedThanaId(thanaId);
+    setSearchFilters(prev => ({ 
+      ...prev, 
+      thana: thanaName || '', 
+      village: '' 
+    }));
+  };
+
+  const handleVillageChange = (villageId, villageName) => {
+    if (villageId === 'OTHER') {
+      setShowCustomVillage(true);
+      setSelectedVillageId(null);
+      setSearchFilters(prev => ({ ...prev, village: '' }));
+      setCustomVillageName('');
+    } else {
+      setShowCustomVillage(false);
+      setSelectedVillageId(villageId);
+      setCustomVillageName('');
+      setSearchFilters(prev => ({ ...prev, village: villageName || '' }));
+    }
+  };
+
+  const handleCustomVillageChange = (value) => {
+    setCustomVillageName(value);
+    setSearchFilters(prev => ({ ...prev, village: value }));
+  };
+
+  const handleNameFilterChange = (value) => {
+    setSearchFilters(prev => ({
+      ...prev,
+      name: value
+    }));
+  };
+
+  const handleClearFilters = () => {
+    const jharkhand = states.find(s => s.name === 'Jharkhand');
+    const defaultStateId = jharkhand ? jharkhand.id : null;
+    
+    setSearchFilters({
+      name: '',
+      stateId: defaultStateId,
+      district: '',
+      thana: '',
+      village: ''
+    });
+    setSelectedStateId(defaultStateId);
+    setSelectedDistrictId(null);
+    setSelectedThanaId(null);
+    setSelectedVillageId(null);
+    setShowCustomVillage(false);
+    setCustomVillageName('');
+  };
+
+  const exportToExcel = async () => {
+    if (!XLSX) {
+      alert('Excel export library is not loaded. Please refresh the page and try again.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // Fetch all matching donations (not paginated) for export
+      const response = await getPublicDonationsPaginated(0, 10000, searchFilters);
+      const allDonations = response.donations || [];
+
+      // Prepare data for Excel
+      const excelData = allDonations.map((donation, index) => ({
+        'S.No': index + 1,
+        'Name': donation.name || 'Anonymous Devotee',
+        'Email': donation.email || '',
+        'Phone': donation.phone || '',
+        'Country': donation.countryName || '',
+        'State': donation.stateName || '',
+        'District': donation.districtName || '',
+        'Thana': donation.thanaName || '',
+        'Village': donation.villageName || donation.customVillageName || '',
+        'Amount (₹)': parseFloat(donation.amount || 0).toFixed(2),
+        'Date': formatDate(donation.createdAt)
+      }));
+
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(excelData);
+
+      // Set column widths
+      const colWidths = [
+        { wch: 8 },   // S.No
+        { wch: 25 },  // Name
+        { wch: 30 },  // Email
+        { wch: 15 },  // Phone
+        { wch: 15 },  // Country
+        { wch: 20 },  // State
+        { wch: 20 },  // District
+        { wch: 20 },  // Thana
+        { wch: 25 },  // Village
+        { wch: 15 },  // Amount
+        { wch: 20 }   // Date
+      ];
+      ws['!cols'] = colWidths;
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Donor List');
+
+      // Generate filename with current date
+      const dateStr = new Date().toISOString().split('T')[0];
+      const filename = `Donor_List_${dateStr}.xlsx`;
+
+      // Write file
+      XLSX.writeFile(wb, filename);
+    } catch (err) {
+      console.error('Error exporting to Excel:', err);
+      setError('Failed to export data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-saffron-50 to-white py-8 md:py-12 px-4 md:px-6">
       <div className="max-w-7xl mx-auto">
@@ -72,14 +410,171 @@ const DonorList = () => {
           </p>
         </div>
 
-        {/* Stats */}
-        {totalElements > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6 text-center">
-            <p className="text-gray-700 text-sm md:text-base">
-              Total Donors: <span className="font-bold text-saffron-600">{totalElements}</span>
-            </p>
+        {/* Stats and Export Button */}
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            {totalElements > 0 && (
+              <p className="text-gray-700 text-sm md:text-base">
+                Total Donors: <span className="font-bold text-saffron-600">{totalElements}</span>
+              </p>
+            )}
+            <button
+              onClick={exportToExcel}
+              disabled={loading || totalElements === 0}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md ${
+                loading || totalElements === 0
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+            >
+              📥 Download Excel
+            </button>
           </div>
-        )}
+        </div>
+
+        {/* Search Filters */}
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+          <h2 className="text-xl font-bold text-saffron-600 mb-4">Search Filters</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Name Search */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Name (Wildcard Search)
+              </label>
+              <input
+                type="text"
+                value={searchFilters.name}
+                onChange={(e) => handleNameFilterChange(e.target.value)}
+                placeholder="Enter name..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* State Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                State
+              </label>
+              <select
+                value={selectedStateId || ''}
+                onChange={(e) => {
+                  const stateId = e.target.value ? parseInt(e.target.value) : null;
+                  console.log('State changed to:', stateId); // Debug log
+                  handleStateChange(stateId, null);
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent bg-white"
+              >
+                <option value="">All States</option>
+                {states.map((state) => (
+                  <option key={state.id} value={state.id}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* District/City Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                District/City
+              </label>
+              <select
+                value={selectedDistrictId || ''}
+                onChange={(e) => {
+                  const districtId = e.target.value ? parseInt(e.target.value) : null;
+                  const district = districts.find(d => d.id === districtId);
+                  handleDistrictChange(districtId, district?.name);
+                }}
+                disabled={!selectedStateId || districts.length === 0}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">All Districts</option>
+                {districts.map((district) => (
+                  <option key={district.id} value={district.id}>
+                    {district.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Thana Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Thana
+              </label>
+              <select
+                value={selectedThanaId || ''}
+                onChange={(e) => {
+                  const thanaId = e.target.value ? parseInt(e.target.value) : null;
+                  const thana = thanas.find(t => t.id === thanaId);
+                  handleThanaChange(thanaId, thana?.name);
+                }}
+                disabled={!selectedDistrictId || thanas.length === 0}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">All Thanas</option>
+                {thanas.map((thana) => (
+                  <option key={thana.id} value={thana.id}>
+                    {thana.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Village Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Village
+              </label>
+              {!showCustomVillage ? (
+                <select
+                  value={selectedVillageId || ''}
+                  onChange={(e) => {
+                    if (e.target.value === 'OTHER') {
+                      handleVillageChange('OTHER', '');
+                    } else {
+                      const villageId = e.target.value ? parseInt(e.target.value) : null;
+                      const village = villages.find(v => v.id === villageId);
+                      handleVillageChange(villageId, village?.name);
+                    }
+                  }}
+                  disabled={!selectedThanaId || villages.length === 0}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">All Villages</option>
+                  {villages.map((village) => (
+                    <option key={village.id} value={village.id}>
+                      {village.name}
+                    </option>
+                  ))}
+                  {villages.length > 0 && (
+                    <option value="OTHER">Other (Village not listed)</option>
+                  )}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={customVillageName}
+                  onChange={(e) => handleCustomVillageChange(e.target.value)}
+                  placeholder="Enter village name..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent"
+                />
+              )}
+            </div>
+          </div>
+          
+          {/* Clear Filters Button */}
+          {(searchFilters.name || searchFilters.district || searchFilters.thana || searchFilters.village) && (
+            <div className="mt-4">
+              <button
+                onClick={handleClearFilters}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-semibold"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Loading State */}
         {loading && (

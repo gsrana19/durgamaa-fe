@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAdminUpdates, createUpdate, updateUpdate, deleteUpdate, checkAuth, logout } from '../../services/api';
+import { getAdminUpdates, createUpdate, updateUpdate, deleteUpdate, checkAuth, logout, uploadImage } from '../../services/api';
 
 const AdminUpdates = () => {
   const [updates, setUpdates] = useState([]);
@@ -8,6 +8,9 @@ const AdminUpdates = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ title: '', message: '', imageUrl: '' });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -55,8 +58,45 @@ const AdminUpdates = () => {
       message: update.message,
       imageUrl: update.imageUrl || '',
     });
+    setSelectedFile(null);
+    setImagePreview(update.imageUrl || null);
     setEditingId(update.id);
     setShowForm(true);
+  };
+  
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
+  
+  const handleUploadImage = async () => {
+    if (!selectedFile) {
+      alert('Please select a file first');
+      return;
+    }
+    
+    try {
+      setUploadingImage(true);
+      const response = await uploadImage(selectedFile);
+      // Construct full URL - backend returns /uploads/filename, so we need to prepend the backend base URL
+      const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8082/api';
+      const backendBaseUrl = apiBaseUrl.replace('/api', '');
+      const imageUrl = backendBaseUrl + response.url;
+      setFormData({ ...formData, imageUrl });
+      setImagePreview(imageUrl);
+      alert('Image uploaded successfully!');
+      setSelectedFile(null); // Clear selected file after successful upload
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
   };
   
   const handleDelete = async (id) => {
@@ -106,6 +146,12 @@ const AdminUpdates = () => {
                 Donations
               </button>
               <button
+                onClick={() => navigate('/admin/expenses')}
+                className="px-3 md:px-4 py-2 bg-white text-saffron-600 rounded hover:bg-gray-100 text-sm md:text-base"
+              >
+                Expenses
+              </button>
+              <button
                 onClick={handleLogout}
                 className="px-3 md:px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm md:text-base"
               >
@@ -123,6 +169,8 @@ const AdminUpdates = () => {
               setShowForm(!showForm);
               setEditingId(null);
               setFormData({ title: '', message: '', imageUrl: '' });
+              setSelectedFile(null);
+              setImagePreview(null);
             }}
             className="w-full md:w-auto bg-saffron-500 text-white px-6 py-3 rounded-lg hover:bg-saffron-600 text-base md:text-lg font-semibold"
           >
@@ -159,14 +207,59 @@ const AdminUpdates = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">Image URL</label>
-                <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e => setFormData({ ...formData, imageUrl: e.target.value }))}
-                  className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 text-base"
-                  placeholder="https://example.com/image.jpg"
-                />
+                <label className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">Image</label>
+                <div className="space-y-3">
+                  <div className="flex gap-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 text-base"
+                    />
+                    {selectedFile && (
+                      <button
+                        type="button"
+                        onClick={handleUploadImage}
+                        disabled={uploadingImage}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap ${
+                          uploadingImage
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-500 text-white hover:bg-blue-600'
+                        }`}
+                      >
+                        {uploadingImage ? 'Uploading...' : 'Upload'}
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Image Preview */}
+                  {imagePreview && (
+                    <div className="mt-3">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="max-w-full h-48 object-cover rounded-lg border-2 border-gray-300"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Or use URL input */}
+                  <div className="text-sm text-gray-600 mt-2">
+                    <span className="font-semibold">OR</span> enter image URL:
+                  </div>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e => setFormData({ ...formData, imageUrl: e.target.value }))}
+                    onBlur={(e) => {
+                      if (e.target.value) {
+                        setImagePreview(e.target.value);
+                      }
+                    }}
+                    className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 text-base"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
               </div>
               <button
                 type="submit"

@@ -29,26 +29,26 @@ const Home = () => {
       </section>
       
       <section className="features">
-        <div className="feature-card">
+        <Link to="/daily-puja" className="feature-card" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="feature-icon">🕉️</div>
           <h3>{t('home.dailyPuja')}</h3>
           <p>{t('home.dailyPujaDesc')}</p>
-        </div>
-        <div className="feature-card">
+        </Link>
+        <Link to="/special-events" className="feature-card" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="feature-icon">📿</div>
           <h3>{t('home.specialEvents')}</h3>
           <p>{t('home.specialEventsDesc')}</p>
-        </div>
-        <div className="feature-card">
+        </Link>
+        <Link to="/seva-booking" className="feature-card" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="feature-icon">🙏</div>
           <h3>{t('home.sevaBooking')}</h3>
           <p>{t('home.sevaBookingDesc')}</p>
-        </div>
-        <div className="feature-card">
+        </Link>
+        <Link to="/prasad-distribution" className="feature-card" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="feature-icon">🕯️</div>
           <h3>{t('home.prasadDistribution')}</h3>
           <p>{t('home.prasadDistributionDesc')}</p>
-        </div>
+        </Link>
       </section>
 
       <section className="timings">
