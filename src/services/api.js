@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 // API Base URL configuration
-// Frontend must call API Gateway only, not backend services directly
-// For local development: use http://localhost:8082/api (API Gateway)
+// For local development: use http://localhost:8081/api (monolithic backend)
+// For API Gateway: use http://localhost:8082/api
 // For ngrok: set REACT_APP_API_URL in frontend/.env file
 // Example: REACT_APP_API_URL=https://xxxx-xx-xx-xx-xx.ngrok-free.app/api
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8082/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

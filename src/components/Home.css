@@ -352,3 +352,104 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Temple Location Section */
+.temple-location {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.temple-location h2 {
+  text-align: center;
+  color: #FF9933;
+  margin-bottom: 30px;
+  font-size: 2rem;
+}
+
+.location-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.map-container {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.map-container iframe {
+  display: block;
+  width: 100%;
+  min-height: 450px;
+}
+
+.location-address {
+  text-align: center;
+  padding: 20px;
+}
+
+.address-text {
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+}
+
+.address-text strong {
+  color: #FF9933;
+  font-size: 1.2rem;
+}
+
+.maps-btn {
+  margin-top: 15px;
+  padding: 15px 35px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.maps-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 153, 51, 0.8);
+}
+
+.maps-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .temple-location {
+    padding: 20px;
+  }
+  
+  .map-container iframe {
+    min-height: 350px;
+  }
+  
+  .address-text {
+    font-size: 1rem;
+  }
+  
+  .maps-btn {
+    width: 100%;
+    padding: 12px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-container iframe {
+    min-height: 300px;
+  }
+  
+  .temple-location h2 {
+    font-size: 1.5rem;
+  }
+}

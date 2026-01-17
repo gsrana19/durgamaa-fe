@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
+import { openGoogleMaps, getEmbeddedMapUrl } from '../utils/mapsHelper';
 import './Home.css';
 
 const Home = () => {
@@ -65,6 +66,37 @@ const Home = () => {
           <div className="timing-item">
             <h4>{t('home.eveningAarti')}</h4>
             <p>6:00 PM - 7:00 PM</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="temple-location">
+        <h2>📍 Temple Location</h2>
+        <div className="location-content">
+          <div className="map-container">
+            <iframe
+              src={getEmbeddedMapUrl('3FFH+GP4,Kariyatpur,Mangura,Jharkhand,India')}
+              width="100%"
+              height="450"
+              style={{ border: 0, borderRadius: '10px' }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Durga Maa Temple Location"
+            ></iframe>
+          </div>
+          <div className="location-address">
+            <p className="address-text">
+              <strong>Address:</strong><br />
+              3FFH+GP4, Kariyatpur, Mangura,<br />
+              Jharkhand 825402, India
+            </p>
+            <button 
+              className="btn btn-primary maps-btn"
+              onClick={() => openGoogleMaps('3FFH+GP4,Kariyatpur,Mangura,Jharkhand,India')}
+            >
+              🗺️ Open in Google Maps
+            </button>
           </div>
         </div>
       </section>
