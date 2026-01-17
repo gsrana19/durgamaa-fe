@@ -88,6 +88,32 @@ export const createDonation = async (donationData) => {
   return response.data;
 };
 
+// Donation Confirmation APIs
+export const confirmDonation = async (confirmationData) => {
+  const response = await api.post('/donations/confirm', confirmationData);
+  return response.data;
+};
+
+export const getDonationConfirmations = async (status = null) => {
+  const params = status ? `?status=${status}` : '';
+  const response = await api.get(`/admin/donation-confirmations${params}`);
+  return response.data;
+};
+
+export const verifyDonationConfirmation = async (id, adminNote = '') => {
+  const response = await api.post(`/admin/donation-confirmations/${id}/verify`, {
+    adminNote: adminNote
+  });
+  return response.data;
+};
+
+export const rejectDonationConfirmation = async (id, adminNote = '') => {
+  const response = await api.post(`/admin/donation-confirmations/${id}/reject`, {
+    adminNote: adminNote
+  });
+  return response.data;
+};
+
 export const getPublicUpdates = async () => {
   const response = await api.get('/updates/public');
   return response.data;

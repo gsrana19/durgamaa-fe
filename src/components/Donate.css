@@ -1,0 +1,570 @@
+.donate-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 40px;
+}
+
+.donate-hero {
+  background: linear-gradient(135deg, #FF9933 0%, #FF6600 100%);
+  color: white;
+  padding: 60px 20px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.donate-hero-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.donate-hero-content p {
+  font-size: 1.2rem;
+  opacity: 0.95;
+}
+
+.donate-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+/* Tabs */
+.donate-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+  overflow-x: auto;
+}
+
+.tab-button {
+  flex: 1;
+  min-width: 150px;
+  padding: 15px 20px;
+  background: #f5f5f5;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.tab-button.active {
+  background: white;
+  color: #FF9933;
+  border-bottom-color: #FF9933;
+}
+
+.tab-content {
+  min-height: 400px;
+}
+
+.donate-disclaimer {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.donate-disclaimer p {
+  margin: 0;
+  color: #856404;
+  font-size: 0.95rem;
+}
+
+.donate-section {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.donate-section h2 {
+  color: #FF9933;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  border-bottom: 2px solid #FF9933;
+  padding-bottom: 10px;
+}
+
+.section-subtitle {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.donate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #333;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.required {
+  color: #e74c3c;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #FF9933;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.upi-details {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.upi-info {
+  margin-bottom: 20px;
+}
+
+.upi-info label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 600;
+}
+
+.copy-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+
+.copy-field span {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  color: #333;
+  word-break: break-all;
+}
+
+.upi-id {
+  font-weight: 600;
+  color: #FF9933;
+}
+
+.copy-btn {
+  padding: 8px 16px;
+  background: #FF9933;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.3s;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  background: #FF6600;
+}
+
+.copy-btn:active {
+  transform: scale(0.98);
+}
+
+.qr-code-container {
+  margin-top: 20px;
+}
+
+.qr-code-container label {
+  display: block;
+  margin-bottom: 10px;
+  color: #333;
+  font-weight: 600;
+}
+
+.qr-code {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  min-height: 250px;
+}
+
+.qr-code img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+}
+
+.qr-placeholder {
+  text-align: center;
+  color: #999;
+}
+
+.qr-placeholder p {
+  margin: 10px 0;
+}
+
+.qr-note {
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.btn {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FF9933 0%, #FF6600 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 153, 51, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 153, 51, 0.6);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-upi {
+  width: 100%;
+  margin-top: 10px;
+  font-size: 1.2rem;
+  padding: 16px;
+}
+
+.upi-app-buttons {
+  margin-top: 20px;
+}
+
+.upi-app-label {
+  text-align: center;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.upi-app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.btn-upi-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px 10px;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-height: 90px;
+}
+
+.btn-upi-app:hover {
+  border-color: #FF9933;
+  background: #fff5e6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 153, 51, 0.2);
+}
+
+.btn-upi-app:active {
+  transform: translateY(0);
+}
+
+.upi-app-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.upi-app-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.btn-upi-any {
+  background: linear-gradient(135deg, #FF9933 0%, #FF6600 100%);
+  border-color: #FF9933;
+  color: white;
+}
+
+.btn-upi-any .upi-app-name {
+  color: white;
+}
+
+.btn-upi-any:hover {
+  background: linear-gradient(135deg, #FF6600 0%, #FF9933 100%);
+  box-shadow: 0 4px 12px rgba(255, 153, 51, 0.4);
+}
+
+.help-text {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+.bank-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bank-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bank-info-item label {
+  color: #333;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.bank-info-item span {
+  color: #555;
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+}
+
+.bank-note {
+  background: #e7f3ff;
+  border-left: 4px solid #2196F3;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.bank-note p {
+  margin: 0;
+  color: #1976D2;
+}
+
+.confirm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.success-message {
+  background: #d4edda;
+  border: 2px solid #28a745;
+  color: #155724;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.error-message {
+  background: #f8d7da;
+  border: 2px solid #dc3545;
+  color: #721c24;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.btn-submit {
+  width: 100%;
+  margin-top: 10px;
+  padding: 16px;
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .donate-hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .donate-hero-content p {
+    font-size: 1rem;
+  }
+
+  .donate-container {
+    padding: 20px 15px;
+  }
+
+  .donate-tabs {
+    gap: 5px;
+    margin-bottom: 20px;
+  }
+
+  .tab-button {
+    min-width: 120px;
+    padding: 12px 10px;
+    font-size: 0.9rem;
+  }
+
+  .donate-section {
+    padding: 20px;
+  }
+
+  .donate-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .copy-field {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .copy-btn {
+    width: 100%;
+  }
+
+  .qr-code {
+    min-height: 200px;
+  }
+
+  .upi-app-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .btn-upi-app {
+    min-height: 80px;
+    padding: 12px 8px;
+  }
+
+  .upi-app-icon {
+    font-size: 1.5rem;
+  }
+
+  .upi-app-name {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .donate-hero {
+    padding: 40px 15px;
+  }
+
+  .donate-hero-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .donate-tabs {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .tab-button {
+    width: 100%;
+    min-width: 100%;
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    border-radius: 0;
+  }
+
+  .tab-button.active {
+    border-bottom: 3px solid #FF9933;
+  }
+
+  .donate-section {
+    padding: 15px;
+  }
+
+  .donate-section h2 {
+    font-size: 1.3rem;
+  }
+
+  .tab-content {
+    min-height: 300px;
+  }
+
+  .upi-app-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .btn-upi-app {
+    min-height: 70px;
+    padding: 10px 5px;
+  }
+
+  .upi-app-icon {
+    font-size: 1.3rem;
+  }
+
+  .upi-app-name {
+    font-size: 0.8rem;
+  }
+}
+

@@ -10,6 +10,7 @@ import Services from './components/Services';
 import Contact from './components/Contact';
 import MandirNirmaanSeva from './components/MandirNirmaanSeva';
 import DonorList from './components/DonorList';
+import Donate from './components/Donate';
 import DailyPuja from './components/DailyPuja';
 import SpecialEvents from './components/SpecialEvents';
 import SevaBooking from './components/SevaBooking';
@@ -21,6 +22,7 @@ import FlowerOfferingPage from './components/services/FlowerOfferingPage';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminDonations from './components/admin/AdminDonations';
+import AdminDonationConfirmations from './components/admin/AdminDonationConfirmations';
 import AdminUpdates from './components/admin/AdminUpdates';
 import AdminExpenses from './components/admin/AdminExpenses';
 import AdminEvents from './components/admin/AdminEvents';
@@ -64,6 +66,7 @@ function App() {
               <Route path="/services" element={<Services />} />
               <Route path="/mandir-nirmaan-seva" element={<MandirNirmaanSeva />} />
               <Route path="/donor-list" element={<DonorList />} />
+              <Route path="/donate" element={<Donate />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/daily-puja" element={<DailyPuja />} />
               <Route path="/special-events" element={<SpecialEvents />} />
@@ -76,6 +79,7 @@ function App() {
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
               <Route path="/admin/donations" element={<PrivateRoute><AdminDonations /></PrivateRoute>} />
+              <Route path="/admin/donation-confirmations" element={<PrivateRoute><AdminDonationConfirmations /></PrivateRoute>} />
               <Route path="/admin/updates" element={<PrivateRoute><AdminUpdates /></PrivateRoute>} />
               <Route path="/admin/expenses" element={<PrivateRoute><AdminExpenses /></PrivateRoute>} />
               <Route path="/admin/events" element={<PrivateRoute><AdminEvents /></PrivateRoute>} />

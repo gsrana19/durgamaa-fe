@@ -19,7 +19,10 @@ const Home = () => {
         <div className="hero-content">
           <h1 className="hero-title">{t('home.title')}</h1>
           <p className="hero-subtitle">{t('home.subtitle')}</p>
-          <Link to="/services" className="btn btn-primary">{t('home.bookSeva')}</Link>
+          <div className="hero-buttons">
+            <Link to="/services" className="btn btn-primary">{t('home.bookSeva')}</Link>
+            <Link to="/donate" className="btn btn-primary">🙏 Donate</Link>
+          </div>
         </div>
       </section>
       
@@ -30,6 +33,11 @@ const Home = () => {
       </section>
       
       <section className="features">
+        <Link to="/donate" className="feature-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div className="feature-icon">💰</div>
+          <h3>Donate</h3>
+          <p>Support the temple through UPI or Bank Transfer</p>
+        </Link>
         <Link to="/daily-puja" className="feature-card" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="feature-icon">🕉️</div>
           <h3>{t('home.dailyPuja')}</h3>

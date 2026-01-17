@@ -117,6 +117,12 @@ const AdminDashboard = () => {
                 Team Members
               </button>
               <button
+                onClick={() => navigate('/admin/donation-confirmations')}
+                className="px-3 md:px-4 py-2 bg-white text-saffron-600 rounded hover:bg-gray-100 text-sm md:text-base"
+              >
+                Payment Confirmations
+              </button>
+              <button
                 onClick={handleLogout}
                 className="px-3 md:px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm md:text-base"
               >
@@ -168,6 +174,13 @@ const AdminDashboard = () => {
                 >
                   <div className="font-bold text-saffron-700 text-lg md:text-xl mb-2">Manage Team Members</div>
                   <div className="text-sm md:text-base text-gray-600">Add and manage team member photos</div>
+                </button>
+                <button
+                  onClick={() => navigate('/admin/donation-confirmations')}
+                  className="w-full p-4 md:p-6 bg-saffron-100 hover:bg-saffron-200 rounded-lg text-left transition"
+                >
+                  <div className="font-bold text-saffron-700 text-lg md:text-xl mb-2">Payment Confirmations</div>
+                  <div className="text-sm md:text-base text-gray-600">Verify and manage donation confirmations</div>
                 </button>
               </div>
             </div>

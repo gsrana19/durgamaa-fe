@@ -44,6 +44,14 @@
   padding: 20px;
 }
 
+.hero-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
 .hero-title {
   font-size: 3rem;
   color: #FFFFFF;
