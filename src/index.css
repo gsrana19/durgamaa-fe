@@ -2,10 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global CSS Reset for Mobile Responsiveness */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -13,5 +20,73 @@ body {
   line-height: 1.6;
   color: #333;
   background-color: #f5f5f5;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  width: 100%;
+}
+
+/* Ensure all images are responsive */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Prevent images and media from overflowing */
+iframe, embed, object, video {
+  max-width: 100%;
+}
+
+/* Ensure tables don't overflow by default */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Touch-friendly button and input minimum sizes */
+button, input, select, textarea, a {
+  min-height: 44px; /* Apple's recommended touch target size */
+  touch-action: manipulation; /* Reduce double-tap delay on mobile */
+}
+
+/* Input and select elements should have minimum height */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+  min-height: 44px;
+}
+
+/* Links should maintain minimum height where appropriate */
+a.button,
+a.btn,
+button,
+input[type="button"],
+input[type="submit"] {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive typography */
+h1, h2, h3, h4, h5, h6 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+p, span, div {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Prevent text selection issues on mobile */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
 }
 
