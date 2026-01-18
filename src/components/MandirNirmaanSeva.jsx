@@ -275,6 +275,13 @@ const MandirNirmaanSeva = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate phone number - must be exactly 10 digits starting with 6-9
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!formData.phone || !phoneRegex.test(formData.phone)) {
+      alert('Please enter a valid 10-digit Indian mobile number (must start with 6, 7, 8, or 9).');
+      return;
+    }
+    
     // Validation: Either villageId or customVillageName must be provided
     if (!selectedVillageId && (!customVillageName || customVillageName.trim() === '')) {
       alert('Please select a village or enter a custom village name.');
@@ -286,50 +293,36 @@ const MandirNirmaanSeva = () => {
   };
 
   const handlePaymentComplete = async () => {
-    // After payment confirmation is submitted, create donation record
-    setLoading(true);
-    try {
-      const donationPayload = {
-        ...formData,
-        countryId: selectedCountryId,
-        stateId: selectedStateId,
-        districtId: selectedDistrictId,
-        thanaId: selectedThanaId,
-        villageId: selectedVillageId,
-        customVillageName: selectedVillageId ? null : customVillageName.trim(),
-      };
-      
-      const response = await createDonation(donationPayload);
-      setReceipt(response);
-      setShowPaymentModal(false);
-      
-      // Reset form - reload default location
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        amount: 0,
-        showPublic: true,
-      });
-      setCustomVillageName('');
-      setSelectedVillageId(null);
-      setShowCustomVillage(false);
-      
-      // Reset to default location (India -> Jharkhand -> Hazaribag -> Ichak -> Mangura)
-      if (countries.length > 0) {
-        const india = countries.find(c => c.name === 'India') || countries[0];
-        if (india) {
-          setSelectedCountryId(india.id);
-        }
+    // Payment confirmation has been submitted (status: PENDING) via TemplePaymentPanel
+    // Donation record will ONLY be created when admin verifies the payment confirmation
+    // This ensures stats (Total Collected, Devotees) only increase after admin verification
+    setShowPaymentModal(false);
+    
+    // Show success message
+    alert('Thank you! Your payment confirmation has been submitted and is pending verification. Your donation will be counted in "Total Collected" and "Devotees" only after admin verification.');
+    
+    // Reset form - reload default location
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      amount: 0,
+      showPublic: true,
+    });
+    setCustomVillageName('');
+    setSelectedVillageId(null);
+    setShowCustomVillage(false);
+    
+    // Reset to default location (India -> Jharkhand -> Hazaribag -> Ichak -> Mangura)
+    if (countries.length > 0) {
+      const india = countries.find(c => c.name === 'India') || countries[0];
+      if (india) {
+        setSelectedCountryId(india.id);
       }
-      
-      await loadData();
-    } catch (error) {
-      console.error('Error submitting donation:', error);
-      alert('Error submitting donation. Please try again.');
-    } finally {
-      setLoading(false);
     }
+    
+    // Reload data to refresh stats (though count won't change until verified)
+    await loadData();
   };
   
   const progress = stats ? (stats.totalAmount / stats.targetAmount) * 100 : 0;
@@ -500,10 +493,25 @@ const MandirNirmaanSeva = () => {
                     type="tel"
                     required
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => {
+                      // Only allow digits, max 10 digits
+                      let value = e.target.value.replace(/[^\d]/g, '').slice(0, 10);
+                      // Only allow if starts with 6-9 (valid Indian mobile number)
+                      if (value.length === 0 || /^[6-9]/.test(value)) {
+                        setFormData({ ...formData, phone: value });
+                      }
+                    }}
+                    pattern="[6-9]\d{9}"
+                    title="Please enter a valid 10-digit Indian mobile number (starts with 6-9)"
                     className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base min-h-[44px]"
-                    placeholder={t('donation.phonePlaceholder')}
+                    placeholder={t('donation.phonePlaceholder') || "Enter 10-digit mobile number"}
                   />
+                  {formData.phone && formData.phone.length !== 10 && (
+                    <p className="text-red-600 text-sm mt-1">Mobile number must be exactly 10 digits</p>
+                  )}
+                  {formData.phone && formData.phone.length === 10 && !/^[6-9]\d{9}$/.test(formData.phone) && (
+                    <p className="text-red-600 text-sm mt-1">Mobile number must start with 6, 7, 8, or 9</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-gray-700 font-semibold mb-2 text-sm md:text-base">{t('donation.amountLabel')}</label>

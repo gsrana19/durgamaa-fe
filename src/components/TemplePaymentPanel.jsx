@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { generateUpiLink, copyToClipboard, openUpiPayment } from '../utils/donateHelper';
+import { generateUpiLink, generateAppSpecificUpiLink, copyToClipboard, openUpiPayment } from '../utils/donateHelper';
 import { isValidMobile } from '../utils/messagingHelper';
 import './TemplePaymentPanel.css';
 
 const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '', onPaymentConfirmed }) => {
   const [copySuccess, setCopySuccess] = useState({});
+  const [showUpiAppModal, setShowUpiAppModal] = useState(false);
   const [confirmForm, setConfirmForm] = useState({
     amount: amount || '',
     method: 'UPI',
@@ -41,13 +42,29 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
       alert('Please enter a valid amount');
       return;
     }
+    // Show UPI app selection modal
+    setShowUpiAppModal(true);
+  };
 
+  const handleUpiAppSelect = (app) => {
+    const payAmount = amount || confirmForm.amount;
     const note = purpose || confirmForm.purpose || 'Payment';
-    const upiLink = generateUpiLink(UPI_ID, PAYEE_NAME, payAmount, note);
+    
+    let upiLink;
+    if (app === 'generic' || app === 'other') {
+      // Generic UPI link - Android will show app chooser
+      upiLink = generateUpiLink(UPI_ID, PAYEE_NAME, payAmount, note);
+    } else {
+      // App-specific deep link
+      upiLink = generateAppSpecificUpiLink(app, UPI_ID, PAYEE_NAME, payAmount, note);
+    }
+    
+    setShowUpiAppModal(false);
     
     try {
-      openUpiPayment(upiLink);
+      openUpiPayment(upiLink, app === 'generic' || app === 'other' ? 'any' : app);
     } catch (error) {
+      console.error('Error opening UPI app:', error);
       alert('Unable to open UPI app. Please scan the QR code or copy the UPI ID manually.');
     }
   };
@@ -247,6 +264,61 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
           Pay via UPI App
         </button>
       </section>
+
+      {/* UPI App Selection Modal */}
+      {showUpiAppModal && (
+        <div className="modal-overlay" onClick={() => setShowUpiAppModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Choose UPI App</h3>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowUpiAppModal(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="upi-app-grid">
+              <button
+                className="upi-app-option"
+                onClick={() => handleUpiAppSelect('phonepe')}
+              >
+                <div className="upi-app-icon">📱</div>
+                <div className="upi-app-name">PhonePe</div>
+              </button>
+              <button
+                className="upi-app-option"
+                onClick={() => handleUpiAppSelect('gpay')}
+              >
+                <div className="upi-app-icon">💳</div>
+                <div className="upi-app-name">Google Pay</div>
+              </button>
+              <button
+                className="upi-app-option"
+                onClick={() => handleUpiAppSelect('paytm')}
+              >
+                <div className="upi-app-icon">💵</div>
+                <div className="upi-app-name">Paytm</div>
+              </button>
+              <button
+                className="upi-app-option"
+                onClick={() => handleUpiAppSelect('bhim')}
+              >
+                <div className="upi-app-icon">🏦</div>
+                <div className="upi-app-name">BHIM UPI</div>
+              </button>
+              <button
+                className="upi-app-option"
+                onClick={() => handleUpiAppSelect('other')}
+              >
+                <div className="upi-app-icon">📲</div>
+                <div className="upi-app-name">Others</div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bank Transfer Section */}
       <section className="payment-section">
