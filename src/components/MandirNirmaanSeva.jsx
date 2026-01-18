@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
-import { getDonationStats, createDonation, getPublicUpdates, getLatestTempleImage,
+import { getDonationStats, createDonation, getUpdates, getLatestTempleImage, getAllImages,
          getCountries, getStates, getDistricts, getThanas, getVillages } from '../services/api';
+import TemplePaymentPanel from './TemplePaymentPanel';
 
 const MandirNirmaanSeva = () => {
   const { t } = useTranslation();
   const [stats, setStats] = useState(null);
   const [updates, setUpdates] = useState([]);
   const [latestTempleImage, setLatestTempleImage] = useState(null);
+  const [showAllImages, setShowAllImages] = useState(false);
   
   // Location data from API
   const [countries, setCountries] = useState([]);
@@ -36,6 +38,7 @@ const MandirNirmaanSeva = () => {
   
   const [receipt, setReceipt] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   
   // Load countries on mount
   useEffect(() => {
@@ -213,19 +216,53 @@ const MandirNirmaanSeva = () => {
     try {
       const [statsData, updatesData, latestImage] = await Promise.all([
         getDonationStats(),
-        getPublicUpdates(),
+        getUpdates(5, 'desc'), // Get latest 5 updates
         getLatestTempleImage().catch(() => null), // Don't fail if no image available
       ]);
       setStats(statsData);
-      setUpdates(updatesData);
+      
+      // Construct full image URLs for updates
+      const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
+      const backendBaseUrl = apiBaseUrl.replace('/api', '');
+      const updatesWithFullUrls = updatesData.map(update => {
+        // Handle imageUrls array or single imageUrl
+        let firstImageUrl = null;
+        if (update.imageUrls && update.imageUrls.length > 0) {
+          firstImageUrl = update.imageUrls[0];
+        } else if (update.imageUrl) {
+          firstImageUrl = update.imageUrl;
+        }
+        
+        // Convert relative URLs to absolute
+        if (firstImageUrl && !firstImageUrl.startsWith('http')) {
+          firstImageUrl = firstImageUrl.startsWith('/') 
+            ? `${backendBaseUrl}${firstImageUrl}`
+            : `${backendBaseUrl}/${firstImageUrl}`;
+        }
+        
+        // Also process full imageUrls array
+        const fullImageUrls = (update.imageUrls || []).map(imgUrl => {
+          if (!imgUrl || imgUrl.startsWith('http')) return imgUrl;
+          return imgUrl.startsWith('/') 
+            ? `${backendBaseUrl}${imgUrl}`
+            : `${backendBaseUrl}/${imgUrl}`;
+        });
+        
+        return {
+          ...update,
+          imageUrl: firstImageUrl, // For backward compatibility
+          imageUrls: fullImageUrls.length > 0 ? fullImageUrls : (firstImageUrl ? [firstImageUrl] : [])
+        };
+      });
+      setUpdates(updatesWithFullUrls);
       
       // Set latest temple image if available
       if (latestImage && latestImage.imageUrl) {
-        const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8082/api';
-        const backendBaseUrl = apiBaseUrl.replace('/api', '');
         const fullImageUrl = latestImage.imageUrl.startsWith('http') 
           ? latestImage.imageUrl 
-          : `${backendBaseUrl}${latestImage.imageUrl}`;
+          : (latestImage.imageUrl.startsWith('/') 
+              ? `${backendBaseUrl}${latestImage.imageUrl}`
+              : `${backendBaseUrl}/${latestImage.imageUrl}`);
         setLatestTempleImage(fullImageUrl);
       } else {
         setLatestTempleImage(null);
@@ -244,6 +281,12 @@ const MandirNirmaanSeva = () => {
       return;
     }
     
+    // Instead of directly creating donation, open payment modal
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentComplete = async () => {
+    // After payment confirmation is submitted, create donation record
     setLoading(true);
     try {
       const donationPayload = {
@@ -258,6 +301,7 @@ const MandirNirmaanSeva = () => {
       
       const response = await createDonation(donationPayload);
       setReceipt(response);
+      setShowPaymentModal(false);
       
       // Reset form - reload default location
       setFormData({
@@ -292,41 +336,52 @@ const MandirNirmaanSeva = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-saffron-50 to-white">
-      {/* Hero Section - Mobile First */}
-      <section className="bg-gradient-to-r from-saffron-400 to-saffron-600 text-white py-12 md:py-20">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12">
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl md:text-5xl font-bold mb-4">{t('donation.title')}</h1>
-              <p className="text-base md:text-xl leading-relaxed">
-                {t('donation.subtitle')}
+      {/* Hero Section - Image with Text Overlay */}
+      <section className="relative w-full">
+        <div className="relative w-full min-h-[300px] md:min-h-[500px] overflow-hidden">
+          {latestTempleImage ? (
+            <>
+              <img 
+                src={latestTempleImage} 
+                alt="Latest Temple Construction" 
+                className="w-full h-full min-h-[300px] md:min-h-[500px] object-cover"
+                onError={(e) => {
+                  // Fallback to gradient background if image fails to load
+                  e.target.style.display = 'none';
+                  const parent = e.target.parentElement;
+                  if (parent) {
+                    parent.style.background = 'linear-gradient(to right, #f97316, #ea580c)';
+                  }
+                }}
+              />
+              {/* Gradient Overlay for better text readability */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60"></div>
+              
+              {/* Text Overlay - Top */}
+              <div className="absolute top-0 left-0 right-0 pt-8 md:pt-12 px-4 text-center">
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg">
+                  🕉️ Durga Mandir Nirmaan Seva 🕉️
+                </h1>
+              </div>
+              
+              {/* Text Overlay - Bottom */}
+              <div className="absolute bottom-0 left-0 right-0 pb-8 md:pb-12 px-4 text-center">
+                <p className="text-base md:text-xl lg:text-2xl text-white font-medium drop-shadow-lg max-w-4xl mx-auto leading-relaxed">
+                  Join us in building a sacred abode for Maa Durga. Every contribution brings us closer to completing this divine temple.
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-full min-h-[300px] md:min-h-[500px] bg-gradient-to-r from-saffron-400 to-saffron-600 flex flex-col items-center justify-center text-white px-4">
+              <div className="text-6xl md:text-8xl mb-4">🕉️</div>
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 text-center">
+                🕉️ Durga Mandir Nirmaan Seva 🕉️
+              </h1>
+              <p className="text-base md:text-xl lg:text-2xl text-center max-w-4xl leading-relaxed">
+                Join us in building a sacred abode for Maa Durga. Every contribution brings us closer to completing this divine temple.
               </p>
             </div>
-            <div className="flex-1 w-full md:w-auto">
-              <div className="bg-white bg-opacity-20 rounded-lg p-4 md:p-8 text-center overflow-hidden min-h-[200px] md:min-h-[300px] flex items-center justify-center">
-                {latestTempleImage ? (
-                  <img 
-                    src={latestTempleImage} 
-                    alt="Latest Temple Construction" 
-                    className="w-full h-full max-h-[300px] md:max-h-[400px] object-cover rounded-lg"
-                    onError={(e) => {
-                      // Fallback to Om symbol if image fails to load
-                      e.target.style.display = 'none';
-                      const parent = e.target.parentElement;
-                      if (parent && !parent.querySelector('.fallback-om')) {
-                        const fallback = document.createElement('div');
-                        fallback.className = 'text-6xl fallback-om';
-                        fallback.textContent = '🕉️';
-                        parent.appendChild(fallback);
-                      }
-                    }}
-                  />
-                ) : (
-                  <div className="text-6xl">🕉️</div>
-                )}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
       
@@ -425,7 +480,7 @@ const MandirNirmaanSeva = () => {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base"
+                    className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base min-h-[44px]"
                     placeholder={t('donation.fullNamePlaceholder')}
                   />
                 </div>
@@ -435,7 +490,7 @@ const MandirNirmaanSeva = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base"
+                    className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base min-h-[44px]"
                     placeholder={t('donation.emailPlaceholder')}
                   />
                 </div>
@@ -446,7 +501,7 @@ const MandirNirmaanSeva = () => {
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base"
+                    className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base min-h-[44px]"
                     placeholder={t('donation.phonePlaceholder')}
                   />
                 </div>
@@ -458,7 +513,7 @@ const MandirNirmaanSeva = () => {
                     min="1"
                     value={formData.amount || ''}
                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base"
+                    className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base min-h-[44px]"
                     placeholder={t('donation.amountPlaceholder')}
                   />
                 </div>
@@ -474,7 +529,7 @@ const MandirNirmaanSeva = () => {
                       required
                       value={selectedCountryId || ''}
                       onChange={(e) => setSelectedCountryId(parseLong(e.target.value))}
-                      className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white"
+                      className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white min-h-[44px]"
                     >
                       <option value="">{t('donation.selectCountry')}</option>
                       {countries.map((country) => (
@@ -488,7 +543,7 @@ const MandirNirmaanSeva = () => {
                       required
                       value={selectedStateId || ''}
                       onChange={(e) => setSelectedStateId(parseLong(e.target.value))}
-                      className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white"
+                      className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white min-h-[44px]"
                       disabled={!selectedCountryId || states.length === 0}
                     >
                       <option value="">{t('donation.selectState')}</option>
@@ -503,7 +558,7 @@ const MandirNirmaanSeva = () => {
                       required
                       value={selectedDistrictId || ''}
                       onChange={(e) => setSelectedDistrictId(parseLong(e.target.value))}
-                      className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white"
+                      className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white min-h-[44px]"
                       disabled={!selectedStateId || districts.length === 0}
                     >
                       <option value="">{t('donation.selectDistrict')}</option>
@@ -518,7 +573,7 @@ const MandirNirmaanSeva = () => {
                       required
                       value={selectedThanaId || ''}
                       onChange={(e) => setSelectedThanaId(parseLong(e.target.value))}
-                      className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white"
+                      className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white min-h-[44px]"
                       disabled={!selectedDistrictId || thanas.length === 0}
                     >
                       <option value="">{t('donation.selectThana')}</option>
@@ -545,7 +600,7 @@ const MandirNirmaanSeva = () => {
                             setCustomVillageName('');
                           }
                         }}
-                        className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white"
+                        className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base bg-white min-h-[44px]"
                         disabled={!selectedThanaId || villages.length === 0}
                       >
                         <option value="">{t('donation.selectVillage')}</option>
@@ -567,7 +622,7 @@ const MandirNirmaanSeva = () => {
                           setCustomVillageName(e.target.value);
                           setSelectedVillageId(null);
                         }}
-                        className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base"
+                        className="w-full px-4 py-3 md:py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent text-base min-h-[44px]"
                         placeholder={t('donation.villagePlaceholder')}
                       />
                     </div>
@@ -590,13 +645,47 @@ const MandirNirmaanSeva = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-saffron-500 to-saffron-600 text-white font-bold py-4 md:py-3 px-6 rounded-lg hover:from-saffron-600 hover:to-saffron-700 disabled:opacity-50 transition text-base md:text-lg"
+                className="w-full bg-gradient-to-r from-saffron-500 to-saffron-600 text-white font-bold py-4 md:py-3 px-6 rounded-lg hover:from-saffron-600 hover:to-saffron-700 disabled:opacity-50 transition text-base md:text-lg min-h-[44px]"
               >
                 {loading ? t('donation.submitting') : t('donation.submitDonation')}
               </button>
             </form>
           )}
         </div>
+
+        {/* Payment Modal */}
+        {showPaymentModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 md:p-8">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-saffron-600 mb-2">
+                      Complete Payment
+                    </h2>
+                    <p className="text-gray-600 text-sm md:text-base">
+                      Donation Amount: ₹{formData.amount ? formData.amount.toLocaleString('en-IN') : '0'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowPaymentModal(false)}
+                    className="text-gray-500 hover:text-gray-700 text-2xl md:text-3xl font-bold min-w-[44px] min-h-[44px]"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <TemplePaymentPanel
+                  amount={formData.amount?.toString() || ''}
+                  purpose="Donation"
+                  donorName={formData.name}
+                  donorMobile={formData.phone}
+                  onPaymentConfirmed={handlePaymentComplete}
+                />
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Donor List Link */}
         <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
@@ -618,25 +707,59 @@ const MandirNirmaanSeva = () => {
         
         {/* Construction Updates - Responsive Grid */}
         <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-saffron-600 mb-4 md:mb-6">{t('donation.constructionUpdates')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {updates.length === 0 ? (
-              <div className="col-span-full text-center text-gray-500 py-8">
-                {t('donation.noUpdates')}
-              </div>
-            ) : (
-              updates.map((update) => (
-                <div key={update.id} className="border-2 border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  {update.imageUrl && (
-                    <img src={update.imageUrl} alt={update.title} className="w-full h-48 object-cover rounded mb-4" />
-                  )}
-                  <h3 className="text-lg md:text-xl font-bold text-saffron-600 mb-2">{update.title}</h3>
-                  <p className="text-gray-700 mb-2 text-sm md:text-base line-clamp-3">{update.message}</p>
-                  <p className="text-xs md:text-sm text-gray-500">{new Date(update.createdAt).toLocaleDateString()}</p>
-                </div>
-              ))
-            )}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 md:mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-saffron-600">{t('donation.constructionUpdates')}</h2>
+            <button
+              onClick={() => setShowAllImages(!showAllImages)}
+              className="w-full md:w-auto bg-saffron-500 text-white px-6 py-2 rounded-lg hover:bg-saffron-600 transition font-semibold text-sm md:text-base"
+            >
+              {showAllImages ? '📋 Show All Updates' : '🖼️ View All Images'}
+            </button>
           </div>
+          
+              {showAllImages ? (
+            /* Images Gallery View - Navigate to gallery page */
+            <div className="text-center py-8">
+              <Link
+                to="/mandir-nirmaan-seva/images"
+                className="inline-block bg-saffron-500 text-white px-8 py-3 rounded-lg hover:bg-saffron-600 transition font-semibold text-base md:text-lg"
+              >
+                🖼️ View All Images Gallery
+              </Link>
+            </div>
+          ) : (
+            /* All Updates View (Default) - Latest 5 */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {updates.length === 0 ? (
+                <div className="col-span-full text-center text-gray-500 py-8">
+                  No construction updates yet. Please check back soon.
+                </div>
+              ) : (
+                updates.map((update) => {
+                  // Get first image from imageUrls array or fall back to imageUrl
+                  const firstImage = (update.imageUrls && update.imageUrls.length > 0) 
+                    ? update.imageUrls[0] 
+                    : update.imageUrl;
+                  
+                  return (
+                    <div key={update.id} className="border-2 border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      {firstImage && (
+                        <img 
+                          src={firstImage} 
+                          alt={update.title} 
+                          className="w-full h-48 object-cover rounded mb-4 cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(firstImage, '_blank')}
+                        />
+                      )}
+                      <h3 className="text-lg md:text-xl font-bold text-saffron-600 mb-2">{update.title}</h3>
+                      <p className="text-gray-700 mb-2 text-sm md:text-base line-clamp-3">{update.message}</p>
+                      <p className="text-xs md:text-sm text-gray-500">{new Date(update.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
         </div>
       </div>
       

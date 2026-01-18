@@ -9,6 +9,7 @@ import About from './components/About';
 import Services from './components/Services';
 import Contact from './components/Contact';
 import MandirNirmaanSeva from './components/MandirNirmaanSeva';
+import ConstructionImagesGallery from './components/ConstructionImagesGallery';
 import DonorList from './components/DonorList';
 import Donate from './components/Donate';
 import DailyPuja from './components/DailyPuja';
@@ -65,6 +66,7 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/services" element={<Services />} />
               <Route path="/mandir-nirmaan-seva" element={<MandirNirmaanSeva />} />
+              <Route path="/mandir-nirmaan-seva/images" element={<ConstructionImagesGallery />} />
               <Route path="/donor-list" element={<DonorList />} />
               <Route path="/donate" element={<Donate />} />
               <Route path="/contact" element={<Contact />} />

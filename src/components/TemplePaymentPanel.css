@@ -1,0 +1,319 @@
+.temple-payment-panel {
+  width: 100%;
+  max-width: 100%;
+}
+
+.payment-disclaimer {
+  background: #fef3c7;
+  border: 2px solid #fbbf24;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.payment-section {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ea580c;
+  margin-bottom: 16px;
+}
+
+.section-subtitle {
+  color: #6b7280;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.amount-display {
+  margin-bottom: 16px;
+}
+
+.amount-value {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fef3c7;
+  border-radius: 8px;
+}
+
+.amount-value label {
+  font-weight: 600;
+  color: #92400e;
+}
+
+.amount-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ea580c;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.required {
+  color: #dc2626;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.2s;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+}
+
+.form-input-readonly {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.upi-details {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.upi-info,
+.payee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upi-info label,
+.payee-info label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.copy-field {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.upi-id {
+  flex: 1;
+  padding: 10px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 14px;
+  color: #111827;
+}
+
+.copy-btn {
+  padding: 10px 16px;
+  background: #ea580c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.copy-btn:hover {
+  background: #c2410c;
+}
+
+.qr-code-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qr-code {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  overflow: hidden;
+}
+
+.qr-code img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.qr-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.qr-placeholder p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.qr-note {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.bank-details {
+  display: grid;
+  gap: 16px;
+}
+
+.bank-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bank-info-item label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.bank-info-item span {
+  padding: 10px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 14px;
+  color: #111827;
+}
+
+.confirm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 44px;
+}
+
+.btn-upi {
+  width: 100%;
+  background: #ea580c;
+  color: white;
+}
+
+.btn-upi:hover {
+  background: #c2410c;
+}
+
+.btn-primary {
+  background: #ea580c;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #c2410c;
+}
+
+.btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-submit {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.success-message {
+  background: #d1fae5;
+  border: 2px solid #10b981;
+  color: #065f46;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.error-message {
+  background: #fee2e2;
+  border: 2px solid #ef4444;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .payment-section {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .amount-text {
+    font-size: 20px;
+  }
+
+  .copy-field {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .copy-btn {
+    width: 100%;
+  }
+
+  .qr-code {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+  }
+}
+

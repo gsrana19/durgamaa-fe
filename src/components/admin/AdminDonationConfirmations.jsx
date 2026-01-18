@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getDonationConfirmations, verifyDonationConfirmation, rejectDonationConfirmation } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
+import { getDonationConfirmations, verifyDonationConfirmation, rejectDonationConfirmation, logout } from '../../services/api';
 import { 
   buildWhatsAppUrl, 
   buildSmsUrl, 
@@ -11,6 +12,7 @@ import {
 import './AdminDonationConfirmations.css';
 
 const AdminDonationConfirmations = () => {
+  const navigate = useNavigate();
   const [confirmations, setConfirmations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('PENDING'); // PENDING, VERIFIED, REJECTED
@@ -21,6 +23,15 @@ const AdminDonationConfirmations = () => {
   const [processing, setProcessing] = useState(false);
   const [actionCompleted, setActionCompleted] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/admin/login');
+    } catch (error) {
+      navigate('/admin/login');
+    }
+  };
 
   useEffect(() => {
     loadConfirmations();
@@ -159,10 +170,53 @@ const AdminDonationConfirmations = () => {
 
   return (
     <div className="admin-confirmations">
-      <div className="admin-confirmations-header">
-        <h1>Donation Confirmations</h1>
-        <p>Verify donations by checking UTR/Transaction ID in bank/UPI records</p>
+      {/* Header - Responsive */}
+      <div className="bg-saffron-600 text-white p-4">
+        <div className="container mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold">Donation Confirmations</h1>
+              <p className="text-sm md:text-base text-saffron-100 mt-1">
+                Verify donations by checking UTR/Transaction ID in bank/UPI records
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => navigate('/admin/dashboard')}
+                className="px-3 md:px-4 py-2 bg-white text-saffron-600 rounded hover:bg-gray-100 text-sm md:text-base"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => navigate('/admin/donations')}
+                className="px-3 md:px-4 py-2 bg-white text-saffron-600 rounded hover:bg-gray-100 text-sm md:text-base"
+              >
+                Donations
+              </button>
+              <button
+                onClick={() => navigate('/admin/updates')}
+                className="px-3 md:px-4 py-2 bg-white text-saffron-600 rounded hover:bg-gray-100 text-sm md:text-base"
+              >
+                Updates
+              </button>
+              <button
+                onClick={() => navigate('/admin/expenses')}
+                className="px-3 md:px-4 py-2 bg-white text-saffron-600 rounded hover:bg-gray-100 text-sm md:text-base"
+              >
+                Expenses
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-3 md:px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm md:text-base"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <div className="container mx-auto px-4 py-6">
 
       {/* Tabs */}
       <div className="confirmations-tabs">
@@ -200,6 +254,7 @@ const AdminDonationConfirmations = () => {
                 <th>Name</th>
                 <th>Mobile</th>
                 <th>Amount</th>
+                <th>Purpose</th>
                 <th>Method</th>
                 <th>UTR/Transaction ID</th>
                 <th>Status</th>
@@ -213,6 +268,11 @@ const AdminDonationConfirmations = () => {
                   <td>{confirmation.name || 'N/A'}</td>
                   <td>{confirmation.mobile || 'N/A'}</td>
                   <td className="amount-cell">{formatAmount(confirmation.amount)}</td>
+                  <td>
+                    <span className={confirmation.purpose && confirmation.purpose.includes('Seva Booking') ? 'purpose-seva' : 'purpose-donation'}>
+                      {confirmation.purpose || 'Donation'}
+                    </span>
+                  </td>
                   <td>{confirmation.method}</td>
                   <td className="utr-cell">
                     <code>{confirmation.utr}</code>
@@ -262,15 +322,15 @@ const AdminDonationConfirmations = () => {
         </div>
       )}
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="toast-notification">
-          {toastMessage}
-        </div>
-      )}
+        {/* Toast Notification */}
+        {toastMessage && (
+          <div className="toast-notification">
+            {toastMessage}
+          </div>
+        )}
 
-      {/* Modal */}
-      {showModal && selectedConfirmation && (
+        {/* Modal */}
+        {showModal && selectedConfirmation && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             {!actionCompleted ? (
@@ -282,6 +342,11 @@ const AdminDonationConfirmations = () => {
                   <p><strong>Name:</strong> {selectedConfirmation.name || 'N/A'}</p>
                   <p><strong>Mobile:</strong> {selectedConfirmation.mobile || 'N/A'}</p>
                   <p><strong>Amount:</strong> {formatAmount(selectedConfirmation.amount)}</p>
+                  <p><strong>Purpose:</strong> 
+                    <span className={selectedConfirmation.purpose && selectedConfirmation.purpose.includes('Seva Booking') ? 'purpose-seva' : 'purpose-donation'} style={{ marginLeft: '8px' }}>
+                      {selectedConfirmation.purpose || 'Donation'}
+                    </span>
+                  </p>
                   <p><strong>Method:</strong> {selectedConfirmation.method}</p>
                   <p><strong>UTR:</strong> <code>{selectedConfirmation.utr}</code></p>
                   {selectedConfirmation.message && (
@@ -380,7 +445,8 @@ const AdminDonationConfirmations = () => {
             )}
           </div>
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

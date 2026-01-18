@@ -90,7 +90,7 @@ export const createDonation = async (donationData) => {
 
 // Donation Confirmation APIs
 export const confirmDonation = async (confirmationData) => {
-  const response = await api.post('/donations/confirm', confirmationData);
+  const response = await api.post('/donation-confirmations', confirmationData);
   return response.data;
 };
 
@@ -116,6 +116,19 @@ export const rejectDonationConfirmation = async (id, adminNote = '') => {
 
 export const getPublicUpdates = async () => {
   const response = await api.get('/updates/public');
+  return response.data;
+};
+
+export const getUpdates = async (limit = 0, sort = 'desc') => {
+  const params = new URLSearchParams();
+  if (limit > 0) params.append('limit', limit.toString());
+  if (sort) params.append('sort', sort);
+  const response = await api.get(`/updates?${params.toString()}`);
+  return response.data;
+};
+
+export const getAllImages = async () => {
+  const response = await api.get('/updates/images');
   return response.data;
 };
 
@@ -211,6 +224,11 @@ export const updateUpdate = async (id, data) => {
 
 export const deleteUpdate = async (id) => {
   const response = await api.delete(`/admin/updates/${id}`);
+  return response.data;
+};
+
+export const setFeaturedImage = async (id, featured) => {
+  const response = await api.post(`/admin/updates/${id}/set-featured?featured=${featured}`);
   return response.data;
 };
 

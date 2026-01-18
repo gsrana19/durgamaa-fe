@@ -98,8 +98,18 @@ const Donate = () => {
     setSubmitSuccess(false);
 
     try {
-      // Clean mobile number (remove spaces, dashes, etc.)
-      const cleanMobile = confirmForm.mobile.replace(/[^\d]/g, '');
+      // Clean mobile number - backend expects exactly 10 digits (no country code)
+      let cleanMobile = confirmForm.mobile.replace(/[^\d]/g, '');
+      // Remove country code (91) if present
+      if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) {
+        cleanMobile = cleanMobile.substring(2);
+      }
+      // Ensure it's exactly 10 digits
+      if (cleanMobile.length !== 10) {
+        setSubmitError('Please enter a valid 10-digit mobile number');
+        setSubmitting(false);
+        return;
+      }
       
       // Submit to backend
       const confirmationData = {
@@ -107,8 +117,9 @@ const Donate = () => {
         method: confirmForm.method,
         utr: confirmForm.utr.trim(),
         name: confirmForm.name || null,
-        mobile: cleanMobile,
-        message: confirmForm.message || null
+        mobile: cleanMobile, // Send only 10 digits to backend
+        message: confirmForm.message || null,
+        purpose: 'Donation' // Default purpose for Donate page
       };
 
       await confirmDonation(confirmationData);
@@ -123,7 +134,16 @@ const Donate = () => {
       });
     } catch (error) {
       console.error('Error submitting donation:', error);
-      setSubmitError('Failed to submit. Please try again.');
+      // Extract error message from Axios error
+      let errorMessage = 'Failed to submit. Please try again.';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 400) {
+        errorMessage = 'Invalid data. Please check your mobile number (10 digits) and UTR.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      setSubmitError(errorMessage);
     } finally {
       setSubmitting(false);
     }

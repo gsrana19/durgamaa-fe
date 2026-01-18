@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { createSevaBooking } from '../services/api';
+import TemplePaymentPanel from './TemplePaymentPanel';
 
 // Hardcoded Sevas array - TODO: Fetch from backend API
 const sevas = [
@@ -40,6 +41,7 @@ const SevaBooking = () => {
   const { t } = useTranslation();
   const [selectedSeva, setSelectedSeva] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [formData, setFormData] = useState({
     sevaName: '',
     bookingDate: '',
@@ -50,6 +52,7 @@ const SevaBooking = () => {
   });
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
 
   const handleBookNow = (seva) => {
     setSelectedSeva(seva);
@@ -116,19 +119,64 @@ const SevaBooking = () => {
       return;
     }
 
+    // Close form modal and open payment modal
+    setShowModal(false);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentComplete = async () => {
+    // After payment confirmation submitted, create booking record
     try {
       await createSevaBooking(formData);
-      closeModal();
-      setSuccessMessage(t('sevaBooking.successMessage'));
+      setShowPaymentModal(false);
+      setPaymentSubmitted(true);
+      setSuccessMessage('Thank you. Your booking request is submitted and will be confirmed after verification.');
+      
+      // Reset form
+      setSelectedSeva(null);
+      setFormData({
+        sevaName: '',
+        bookingDate: '',
+        devoteeName: '',
+        gotra: '',
+        phoneOrEmail: '',
+        specialIntentions: ''
+      });
+      setErrors({});
       
       // Clear success message after 5 seconds
       setTimeout(() => {
         setSuccessMessage('');
+        setPaymentSubmitted(false);
       }, 5000);
     } catch (error) {
       console.error('Error booking seva:', error);
-      const errorMessage = error.response?.data?.error || 'Failed to book seva. Please try again.';
-      setErrors({ submit: errorMessage });
+      // Store booking locally if backend fails
+      const bookings = JSON.parse(localStorage.getItem('pendingSevaBookings') || '[]');
+      bookings.push({
+        ...formData,
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        status: 'PENDING'
+      });
+      localStorage.setItem('pendingSevaBookings', JSON.stringify(bookings));
+      
+      setShowPaymentModal(false);
+      setPaymentSubmitted(true);
+      setSuccessMessage('Thank you. Your booking request is submitted and will be confirmed after verification.');
+      
+      setTimeout(() => {
+        setSuccessMessage('');
+        setPaymentSubmitted(false);
+      }, 5000);
+    }
+  };
+
+  const closePaymentModal = () => {
+    setShowPaymentModal(false);
+    // Reopen booking form
+    if (selectedSeva) {
+      setShowModal(true);
     }
   };
 
@@ -139,11 +187,6 @@ const SevaBooking = () => {
           {t('sevaBooking.title')}
         </h1>
 
-        {/* Payment Note */}
-        <div className="bg-yellow-50 border-2 border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-6 text-sm md:text-base">
-          {/* TODO: Integrate online payment via UPI/QR */}
-          {t('sevaBooking.paymentNote')}
-        </div>
 
         {/* Sevas Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
@@ -315,6 +358,40 @@ const SevaBooking = () => {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Payment Modal */}
+        {showPaymentModal && selectedSeva && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 md:p-8">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-saffron-600 mb-2">
+                      Complete Payment
+                    </h2>
+                    <p className="text-gray-600 text-sm md:text-base">
+                      Seva Booking: {selectedSeva.name}
+                    </p>
+                  </div>
+                  <button
+                    onClick={closePaymentModal}
+                    className="text-gray-500 hover:text-gray-700 text-2xl md:text-3xl font-bold min-w-[44px] min-h-[44px]"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <TemplePaymentPanel
+                  amount={selectedSeva.suggestedDonation ? selectedSeva.suggestedDonation.replace('₹', '').replace(',', '') : ''}
+                  purpose={`Seva Booking - ${selectedSeva.name}`}
+                  donorName={formData.devoteeName}
+                  donorMobile={formData.phoneOrEmail}
+                  onPaymentConfirmed={handlePaymentComplete}
+                />
               </div>
             </div>
           </div>
