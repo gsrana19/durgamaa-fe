@@ -23,6 +23,8 @@ const AdminDonationConfirmations = () => {
   const [processing, setProcessing] = useState(false);
   const [actionCompleted, setActionCompleted] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [screenshotModalOpen, setScreenshotModalOpen] = useState(false);
+  const [screenshotUrl, setScreenshotUrl] = useState(null);
   
   const handleLogout = async () => {
     try {
@@ -256,7 +258,7 @@ const AdminDonationConfirmations = () => {
                 <th>Amount</th>
                 <th>Purpose</th>
                 <th>Method</th>
-                <th>UTR/Transaction ID</th>
+                <th>UTR/Transaction ID / Screenshot</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -275,7 +277,25 @@ const AdminDonationConfirmations = () => {
                   </td>
                   <td>{confirmation.method}</td>
                   <td className="utr-cell">
-                    <code>{confirmation.utr}</code>
+                    {confirmation.utr ? (
+                      <code>{confirmation.utr}</code>
+                    ) : (
+                      <span className="no-utr">N/A</span>
+                    )}
+                    {confirmation.transactionScreenshot && (
+                      <div className="screenshot-link" style={{ marginTop: '4px' }}>
+                        <button
+                          onClick={() => {
+                            const fullUrl = `${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:8081'}${confirmation.transactionScreenshot}`;
+                            setScreenshotUrl(fullUrl);
+                            setScreenshotModalOpen(true);
+                          }}
+                          className="view-screenshot-btn"
+                        >
+                          📷 View Screenshot
+                        </button>
+                      </div>
+                    )}
                   </td>
                   <td>
                     <span className={`status-badge status-${confirmation.status.toLowerCase()}`}>
@@ -348,7 +368,51 @@ const AdminDonationConfirmations = () => {
                     </span>
                   </p>
                   <p><strong>Method:</strong> {selectedConfirmation.method}</p>
-                  <p><strong>UTR:</strong> <code>{selectedConfirmation.utr}</code></p>
+                  <p><strong>UTR:</strong> <code>{selectedConfirmation.utr || 'N/A'}</code></p>
+                  {selectedConfirmation.transactionScreenshot && (
+                    <div style={{ marginTop: '12px' }}>
+                      <p><strong>Transaction Screenshot:</strong></p>
+                      <div style={{ marginTop: '8px' }}>
+                        <button
+                          onClick={() => {
+                            const fullUrl = `${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:8081'}${selectedConfirmation.transactionScreenshot}`;
+                            setScreenshotUrl(fullUrl);
+                            setScreenshotModalOpen(true);
+                          }}
+                          style={{ 
+                            display: 'inline-block',
+                            padding: '8px 16px',
+                            backgroundColor: '#ea580c',
+                            color: 'white',
+                            borderRadius: '6px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            marginRight: '8px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          📷 View Full Size
+                        </button>
+                        <img 
+                          src={`${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:8081'}${selectedConfirmation.transactionScreenshot}`}
+                          alt="Transaction Screenshot"
+                          style={{
+                            maxWidth: '100%',
+                            maxHeight: '300px',
+                            border: '2px solid #e5e7eb',
+                            borderRadius: '8px',
+                            marginTop: '8px',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => {
+                            const fullUrl = `${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:8081'}${selectedConfirmation.transactionScreenshot}`;
+                            setScreenshotUrl(fullUrl);
+                            setScreenshotModalOpen(true);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                   {selectedConfirmation.message && (
                     <p><strong>Message:</strong> {selectedConfirmation.message}</p>
                   )}
@@ -445,6 +509,38 @@ const AdminDonationConfirmations = () => {
             )}
           </div>
         </div>
+        )}
+
+        {/* Screenshot Lightbox Modal */}
+        {screenshotModalOpen && screenshotUrl && (
+          <div 
+            className="screenshot-lightbox-overlay" 
+            onClick={() => {
+              setScreenshotModalOpen(false);
+              setScreenshotUrl(null);
+            }}
+          >
+            <div 
+              className="screenshot-lightbox-content" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="screenshot-lightbox-close"
+                onClick={() => {
+                  setScreenshotModalOpen(false);
+                  setScreenshotUrl(null);
+                }}
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <img 
+                src={screenshotUrl}
+                alt="Transaction Screenshot"
+                className="screenshot-lightbox-image"
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>

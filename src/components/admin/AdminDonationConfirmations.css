@@ -114,6 +114,10 @@
   display: inline-block;
 }
 
+.utr-cell {
+  vertical-align: top;
+}
+
 .utr-cell code {
   background: #f5f5f5;
   padding: 4px 8px;
@@ -247,6 +251,145 @@
   padding: 2px 6px;
   border-radius: 3px;
   font-family: 'Courier New', monospace;
+}
+
+/* Screenshot Display */
+.screenshot-link {
+  margin-top: 8px;
+}
+
+.view-screenshot-link {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #ea580c;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+
+.view-screenshot-link:hover {
+  background-color: #c2410c;
+}
+
+.view-screenshot-btn {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #ea580c;
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.view-screenshot-btn:hover {
+  background-color: #c2410c;
+}
+
+.no-utr {
+  color: #999;
+  font-style: italic;
+}
+
+/* Screenshot Lightbox Modal */
+.screenshot-lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.screenshot-lightbox-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: zoomIn 0.3s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.screenshot-lightbox-image {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.screenshot-lightbox-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 24px;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 2001;
+}
+
+.screenshot-lightbox-close:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .screenshot-lightbox-overlay {
+    padding: 10px;
+  }
+
+  .screenshot-lightbox-image {
+    max-width: 100%;
+    max-height: 85vh;
+  }
+
+  .screenshot-lightbox-close {
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+  }
 }
 
 .modal-form label {

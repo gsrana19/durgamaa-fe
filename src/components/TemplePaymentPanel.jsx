@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { generateUpiLink, generateAppSpecificUpiLink, copyToClipboard, openUpiPayment } from '../utils/donateHelper';
 import { isValidMobile } from '../utils/messagingHelper';
+import { uploadPaymentScreenshot } from '../services/api';
 import './TemplePaymentPanel.css';
 
 const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '', onPaymentConfirmed }) => {
   const [copySuccess, setCopySuccess] = useState({});
   const [showUpiAppModal, setShowUpiAppModal] = useState(false);
+  const [transactionFile, setTransactionFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const [confirmForm, setConfirmForm] = useState({
     amount: amount || '',
     method: 'UPI',
@@ -69,6 +73,43 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setSubmitError('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        setSubmitError('File size must be less than 5MB');
+        return;
+      }
+      
+      setTransactionFile(file);
+      setSubmitError('');
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setTransactionFile(null);
+    setFilePreview(null);
+    // Reset file input
+    const fileInput = document.getElementById('transaction-screenshot');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
   const handleConfirmSubmit = async (e) => {
     e.preventDefault();
 
@@ -77,8 +118,12 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
       return;
     }
 
-    if (!confirmForm.utr || confirmForm.utr.trim() === '') {
-      setSubmitError('Please enter UTR/Transaction ID');
+    // Validate: Either UTR or transaction screenshot must be provided
+    const hasUtr = confirmForm.utr && confirmForm.utr.trim() !== '';
+    const hasFile = transactionFile !== null;
+    
+    if (!hasUtr && !hasFile) {
+      setSubmitError('Please provide either UTR/Transaction ID or upload transaction screenshot');
       return;
     }
 
@@ -105,10 +150,29 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
         return;
       }
 
+      // Upload file first if provided
+      let transactionScreenshotUrl = null;
+      if (transactionFile) {
+        setUploadingFile(true);
+        try {
+          const uploadResponse = await uploadPaymentScreenshot(transactionFile);
+          transactionScreenshotUrl = uploadResponse.url;
+        } catch (uploadError) {
+          console.error('Error uploading screenshot:', uploadError);
+          setSubmitError('Failed to upload screenshot. Please try again or provide UTR/Transaction ID instead.');
+          setSubmitting(false);
+          setUploadingFile(false);
+          return;
+        } finally {
+          setUploadingFile(false);
+        }
+      }
+
       const paymentData = {
         amount: parseFloat(confirmForm.amount),
         method: confirmForm.method,
-        utr: confirmForm.utr.trim(),
+        utr: hasUtr ? confirmForm.utr.trim() : null,
+        transactionScreenshot: transactionScreenshotUrl,
         name: confirmForm.name || null,
         mobile: cleanMobile, // Send only 10 digits to backend
         purpose: confirmForm.purpose || purpose || 'Payment',
@@ -127,6 +191,7 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
             amount: paymentData.amount,
             method: paymentData.method,
             utr: paymentData.utr,
+            transactionScreenshot: paymentData.transactionScreenshot,
             name: paymentData.name,
             mobile: paymentData.mobile,
             message: paymentData.message || null,
@@ -143,7 +208,9 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
             }, 1000);
           }
         } else {
-          throw new Error('Backend not available');
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage = errorData.error || 'Failed to submit payment confirmation';
+          throw new Error(errorMessage);
         }
       } catch (apiError) {
         console.warn('Backend not available, storing in localStorage:', apiError);
@@ -174,9 +241,11 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
         purpose: purpose || '',
         message: ''
       });
+      setTransactionFile(null);
+      setFilePreview(null);
     } catch (error) {
       console.error('Error submitting payment:', error);
-      setSubmitError('Failed to submit. Please try again.');
+      setSubmitError(error.message || 'Failed to submit. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -405,15 +474,59 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
           </div>
 
           <div className="form-group">
-            <label>UTR / Transaction ID <span className="required">*</span></label>
+            <label>
+              UTR / Transaction ID <span className="optional-note">(Required if screenshot not uploaded)</span>
+            </label>
             <input
               type="text"
               value={confirmForm.utr}
               onChange={(e) => setConfirmForm({ ...confirmForm, utr: e.target.value })}
               placeholder="Enter UTR or Transaction ID"
               className="form-input"
-              required
             />
+          </div>
+
+          <div className="form-group">
+            <label>
+              Upload Transaction Screenshot <span className="optional-note">(Required if UTR not provided)</span>
+            </label>
+            <div className="file-upload-container">
+              {!filePreview ? (
+                <div className="file-upload-box">
+                  <input
+                    type="file"
+                    id="transaction-screenshot"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="file-input"
+                  />
+                  <label htmlFor="transaction-screenshot" className="file-upload-label">
+                    <span className="file-upload-icon">📷</span>
+                    <span className="file-upload-text">
+                      {uploadingFile ? 'Uploading...' : 'Click to upload or drag and drop'}
+                    </span>
+                    <span className="file-upload-hint">PNG, JPG, JPEG up to 5MB</span>
+                  </label>
+                </div>
+              ) : (
+                <div className="file-preview-container">
+                  <div className="file-preview">
+                    <img src={filePreview} alt="Transaction screenshot preview" className="file-preview-image" />
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="file-remove-btn"
+                      aria-label="Remove file"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <p className="field-help-text">
+              <strong>Note:</strong> Either UTR/Transaction ID or Transaction Screenshot must be provided
+            </p>
           </div>
 
           <div className="form-group">
@@ -465,9 +578,9 @@ const TemplePaymentPanel = ({ amount, purpose, donorName = '', donorMobile = '',
           <button
             type="submit"
             className="btn btn-primary btn-submit"
-            disabled={submitting}
+            disabled={submitting || uploadingFile}
           >
-            {submitting ? 'Submitting...' : 'Submit Payment Details'}
+            {uploadingFile ? 'Uploading...' : submitting ? 'Submitting...' : 'Submit Payment Details'}
           </button>
         </form>
       </section>

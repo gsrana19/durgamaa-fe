@@ -260,6 +260,27 @@ export const uploadDocument = async (file) => {
   return response.data;
 };
 
+export const uploadPaymentScreenshot = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  // Create a new axios instance without default Content-Type for file uploads
+  // The browser will automatically set Content-Type with boundary for multipart/form-data
+  const uploadApi = axios.create({
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+  });
+  
+  // Public endpoint for payment screenshots (no auth required)
+  // Full path: /api/donation-confirmations/upload-screenshot
+  const response = await uploadApi.post('/donation-confirmations/upload-screenshot', formData, {
+    headers: {
+      // Don't set Content-Type - let browser set it with boundary
+    },
+  });
+  return response.data;
+};
+
 export const getExpenseStats = async () => {
   const response = await api.get('/admin/expenses/stats');
   return response.data;
