@@ -1,42 +1,22 @@
-import { useMemo } from 'react';
+/**
+ * Backward compatibility hook - now uses react-i18next
+ * This allows existing components to continue working without changes
+ * New components should import directly from 'react-i18next'
+ */
+import { useTranslation as useI18nextTranslation } from 'react-i18next';
 import { useLanguage } from '../contexts/LanguageContext';
-import enTranslations from '../translations/en.json';
-import hiTranslations from '../translations/hi.json';
-
-const translations = {
-  en: enTranslations,
-  hi: hiTranslations
-};
 
 export const useTranslation = () => {
+  // Use i18next's useTranslation for the actual translation function
+  const { t: i18nextT, i18n } = useI18nextTranslation();
+  
+  // Get language from LanguageContext (which now uses i18next)
   const { language } = useLanguage();
-
-  const t = useMemo(() => {
-    return (key) => {
-      const keys = key.split('.');
-      let value = translations[language] || translations.en;
-      
-      for (const k of keys) {
-        if (value && typeof value === 'object') {
-          value = value[k];
-        } else {
-          // Fallback to English if translation not found
-          value = translations.en;
-          for (const k2 of keys) {
-            if (value && typeof value === 'object') {
-              value = value[k2];
-            } else {
-              value = undefined;
-              break;
-            }
-          }
-          break;
-        }
-      }
-      
-      return value || key;
-    };
-  }, [language]);
+  
+  // Wrapper function to match old API
+  const t = (key) => {
+    return i18nextT(key) || key; // Fallback to key if translation missing
+  };
 
   return { t, language };
 };

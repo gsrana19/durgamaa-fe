@@ -229,6 +229,64 @@
     "hygienePoint2": "सभी सामग्री ताजी है और विश्वसनीय आपूर्तिकर्ताओं से प्राप्त की जाती है",
     "hygienePoint3": "प्रसाद भक्ति के साथ तैयार किया जाता है और वितरण से पहले देवता को अर्पित किया जाता है",
     "hygienePoint4": "हम अपनी रसोई में एक साफ और स्वच्छ वातावरण बनाए रखते हैं"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "एडमिन डैशबोर्ड",
+      "lastLogin": "अंतिम लॉगिन:",
+      "quickActionsTitle": "त्वरित कार्य",
+      "quickActions": {
+        "manageDonations": "दान प्रबंधन",
+        "manageDonationsDesc": "सभी दान देखें और प्रबंधित करें",
+        "manageUpdates": "अपडेट प्रबंधन",
+        "manageUpdatesDesc": "निर्माण अपडेट जोड़ें और संपादित करें",
+        "manageExpenses": "व्यय प्रबंधन",
+        "manageExpensesDesc": "व्यय जोड़ें और प्रबंधित करें",
+        "manageEvents": "कार्यक्रम प्रबंधन",
+        "manageEventsDesc": "विशेष कार्यक्रम जोड़ें और प्रबंधित करें",
+        "manageTeamMembers": "टीम सदस्य प्रबंधन",
+        "manageTeamMembersDesc": "टीम सदस्य फोटो जोड़ें और प्रबंधित करें",
+        "paymentConfirmations": "भुगतान पुष्टि",
+        "paymentConfirmationsDesc": "दान पुष्टि सत्यापित करें और प्रबंधित करें"
+      },
+      "statisticsTitle": "आँकड़े",
+      "statistics": {
+        "totalAmountCollected": "कुल एकत्रित राशि",
+        "totalMoneyLeft": "कुल बची राशि",
+        "expensedSoFar": "अब तक खर्च",
+        "totalDonors": "कुल दानदाता",
+        "donationsLast7Days": "दान (पिछले 7 दिन)"
+      }
+    },
+    "nav": {
+      "dashboard": "डैशबोर्ड",
+      "donations": "दान",
+      "updates": "अपडेट",
+      "expenses": "व्यय",
+      "events": "कार्यक्रम",
+      "teamMembers": "टीम सदस्य",
+      "paymentConfirmations": "भुगतान पुष्टि"
+    }
+  },
+  "buttons": {
+    "submit": "जमा करें",
+    "cancel": "रद्द करें",
+    "verify": "सत्यापित करें",
+    "reject": "अस्वीकार करें",
+    "logout": "लॉगआउट",
+    "login": "लॉगिन",
+    "save": "सहेजें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "close": "बंद करें",
+    "back": "वापस",
+    "next": "अगला"
+  },
+  "messages": {
+    "loading": "लोड हो रहा है...",
+    "submitting": "जमा किया जा रहा है...",
+    "success": "सफल!",
+    "error": "त्रुटि"
   }
 }
 

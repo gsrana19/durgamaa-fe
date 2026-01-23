@@ -229,6 +229,64 @@
     "hygienePoint2": "All ingredients are fresh and sourced from trusted suppliers",
     "hygienePoint3": "Prasad is prepared with devotion and offered to the deity before distribution",
     "hygienePoint4": "We maintain a clean and sanitized environment in our kitchen"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "lastLogin": "Last login:",
+      "quickActionsTitle": "Quick Actions",
+      "quickActions": {
+        "manageDonations": "Manage Donations",
+        "manageDonationsDesc": "View and manage all donations",
+        "manageUpdates": "Manage Updates",
+        "manageUpdatesDesc": "Add and edit construction updates",
+        "manageExpenses": "Manage Expenses",
+        "manageExpensesDesc": "Add and manage expenditures",
+        "manageEvents": "Manage Events",
+        "manageEventsDesc": "Add and manage special events",
+        "manageTeamMembers": "Manage Team Members",
+        "manageTeamMembersDesc": "Add and manage team member photos",
+        "paymentConfirmations": "Payment Confirmations",
+        "paymentConfirmationsDesc": "Verify and manage donation confirmations"
+      },
+      "statisticsTitle": "Statistics",
+      "statistics": {
+        "totalAmountCollected": "Total Amount Collected",
+        "totalMoneyLeft": "Total Money Left",
+        "expensedSoFar": "Expensed So Far",
+        "totalDonors": "Total Donors",
+        "donationsLast7Days": "Donations (Last 7 Days)"
+      }
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "donations": "Donations",
+      "updates": "Updates",
+      "expenses": "Expenses",
+      "events": "Events",
+      "teamMembers": "Team Members",
+      "paymentConfirmations": "Payment Confirmations"
+    }
+  },
+  "buttons": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "verify": "Verify",
+    "reject": "Reject",
+    "logout": "Logout",
+    "login": "Login",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "submitting": "Submitting...",
+    "success": "Success!",
+    "error": "Error"
   }
 }
 

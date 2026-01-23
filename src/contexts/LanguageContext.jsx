@@ -1,39 +1,32 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const LanguageContext = createContext();
 
+/**
+ * Backward compatibility hook for existing components
+ * Now uses i18next internally
+ */
 export const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
-  return context;
-};
-
-export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en');
-
-  // Load language from localStorage on mount
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('appLanguage');
-    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'hi')) {
-      setLanguage(savedLanguage);
-    }
-  }, []);
-
-  // Save language to localStorage when it changes
-  const changeLanguage = (lang) => {
-    if (lang === 'en' || lang === 'hi') {
-      setLanguage(lang);
-      localStorage.setItem('appLanguage', lang);
+  const { i18n } = useTranslation();
+  
+  return {
+    language: i18n.language || 'en',
+    changeLanguage: (lang) => {
+      if (lang === 'en' || lang === 'hi') {
+        i18n.changeLanguage(lang);
+        // i18next's LanguageDetector automatically saves to localStorage as 'durgamaa_lang'
+      }
     }
   };
+};
 
-  return (
-    <LanguageContext.Provider value={{ language, changeLanguage }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+/**
+ * LanguageProvider - Wraps children (no-op now, but kept for backward compatibility)
+ * i18next is initialized in src/i18n.js and imported in src/index.js
+ */
+export const LanguageProvider = ({ children }) => {
+  return <>{children}</>;
 };
 
 
